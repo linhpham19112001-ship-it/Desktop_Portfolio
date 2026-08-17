@@ -1,0 +1,354 @@
+/* ============================================================
+   The mini desktop that lives inside the CRT.
+   ------------------------------------------------------------
+   Authored at a fixed 906 x 702 "screen resolution" — the exact
+   pixel size of desktop_0000_monitor-2.png — then scaled to fit
+   by --k, which app.js sets on every layout. Design in these
+   906 x 702 units and it will land where you expect.
+
+   Chrome colours are sampled straight from the reference art in
+   app/To dev/Mini_0000_About-me.png, so this is the same classic
+   Windows look rebuilt in CSS — which buys resizable windows the
+   flat image could not give.
+   ============================================================ */
+
+:root{
+  --w-face:      #c0c0c0;   /* 3D button/window face      */
+  --w-light:     #ffffff;   /* top-left highlight          */
+  --w-shadow:    #808080;   /* bottom-right shade          */
+  --w-dark:      #404040;   /* outer bottom-right          */
+  --w-client:    #ffffff;   /* document background         */
+  --w-title-a:   #010095;   /* active title bar, left      */
+  --w-title-b:   #0100b7;   /* active title bar, right     */
+  --w-title-off: #7f7f7f;   /* inactive title bar          */
+  --w-select:    #000080;   /* selection blue              */
+  --w-font:      Tahoma, "Segoe UI", Geneva, Verdana, sans-serif;
+}
+
+.mini{
+  position: absolute;
+  left: 0; top: 0;
+  width: 906px;
+  height: 702px;
+  transform-origin: 0 0;
+  /* two ratios, not one — see the note in app.js layout() */
+  transform: scale(var(--kx, 1), var(--ky, 1));
+  overflow: hidden;
+  user-select: none;
+  color: #000;
+  font: 12px/1.35 var(--w-font);
+  cursor: default;
+}
+
+.mini__desk{ position: absolute; inset: 0; }
+
+.mini__wall{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------
+   Desktop icons
+   ------------------------------------------------------------ */
+
+.mini__icons{ position: absolute; inset: 0; }
+
+.mini__icon{
+  position: absolute;
+  width: 100px;
+  padding: 3px 2px 4px;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  text-align: center;
+  cursor: default;
+  touch-action: none;
+  display: grid;
+  grid-template-rows: 72px auto;   /* fixed glyph row keeps labels on a line */
+  justify-items: center;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Drawn at native size, so the small system icons stay smaller than the
+   68px app tiles — exactly as they sit in the reference. */
+.mini__icon img{
+  max-width: 72px;
+  max-height: 70px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.mini__icon span{
+  display: inline-block;
+  max-width: 100%;
+  padding: 1px 3px;
+  /* The label look sampled from the artwork: white text, hard dark shadow. */
+  text-shadow: 1px 1px 1px rgba(0,0,0,.9), 0 0 3px rgba(0,0,0,.55);
+  overflow-wrap: anywhere;
+}
+
+/* Selected: XP tints the glyph blue and boxes the label. */
+.mini__icon.is-sel img{
+  filter: drop-shadow(0 0 0 #3b6ea5) saturate(.6) brightness(.85);
+}
+.mini__icon.is-sel span{
+  background: var(--w-select);
+  outline: 1px dotted #d6d6d6;
+  outline-offset: -1px;
+  text-shadow: none;
+}
+
+/* ------------------------------------------------------------
+   Windows — classic 3D chrome
+   ------------------------------------------------------------ */
+
+.mini__windows{ position: absolute; inset: 0; pointer-events: none; }
+.mini__windows > *{ pointer-events: auto; }
+
+.win{
+  background: var(--w-face);
+  border: 1px solid;
+  border-color: var(--w-light) var(--w-dark) var(--w-dark) var(--w-light);
+  box-shadow: inset -1px -1px 0 var(--w-shadow), inset 1px 1px 0 var(--w-face);
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mini__win{
+  position: absolute;
+  min-width: 220px;
+  min-height: 140px;
+}
+
+/* Minimised = rolled up to the title bar. There is no taskbar in the
+   artwork, so it has to stay visible and reversible. */
+.mini__win.is-min{
+  height: auto !important;
+  min-height: 0;
+}
+.mini__win.is-min .win__menu,
+.mini__win.is-min .win__body,
+.mini__win.is-min .win__grip{ display: none; }
+
+.mini__win.is-max{
+  left: 0 !important;
+  top: 0 !important;
+  width: 906px !important;
+  height: 702px !important;
+}
+
+.win__bar{
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 2px 0 3px;
+  background: linear-gradient(90deg, var(--w-title-a), var(--w-title-b));
+  color: #fff;
+  cursor: grab;
+  touch-action: none;
+}
+.win__bar.is-drag{ cursor: grabbing; }
+
+.mini__win.is-blur .win__bar{ background: var(--w-title-off); }
+
+.win__icon{
+  flex: none;
+  width: 16px; height: 16px;
+  background: center / contain no-repeat;
+  image-rendering: pixelated;
+}
+.win__icon--mail{
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='3' width='14' height='10' fill='%23fff' stroke='%23000'/%3E%3Cpath d='M1.5 3.5 8 8.5l6.5-5' fill='none' stroke='%23000'/%3E%3C/svg%3E");
+}
+
+.win__title{
+  flex: 1;
+  font-weight: 700;
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.win__buttons{ flex: none; display: flex; gap: 2px; }
+
+.win__btn{
+  width: 18px; height: 16px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font: 700 9px/1 var(--w-font);
+  color: #000;
+  background: var(--w-face);
+  border: 1px solid;
+  border-color: var(--w-light) var(--w-dark) var(--w-dark) var(--w-light);
+  box-shadow: inset -1px -1px 0 var(--w-shadow);
+  cursor: pointer;
+}
+.win__btn:active{
+  border-color: var(--w-dark) var(--w-light) var(--w-light) var(--w-dark);
+  box-shadow: none;
+  padding: 1px 0 0 1px;
+}
+
+.win__menu{
+  flex: none;
+  padding: 2px 5px 3px;
+  font-size: 11.5px;
+  background: var(--w-face);
+}
+.win__menu u{ text-decoration: underline; }
+
+.win__body{
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin: 2px 0 0;
+  padding: 8px 10px;
+  background: var(--w-client);
+  border: 1px solid;
+  border-color: var(--w-shadow) var(--w-light) var(--w-light) var(--w-shadow);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.win__body h4{ margin: 0 0 6px; font-size: 12.5px; }
+.win__body p{ margin: 0 0 9px; }
+.win__body p:last-child, .win__body ul:last-child{ margin-bottom: 0; }
+.win__body ul{ margin: 0 0 9px; padding: 0; list-style: none; }
+.win__body li{
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  border-bottom: 1px dotted #b9b9b9;
+}
+.win__body li:last-child{ border-bottom: 0; }
+.win__body i{ font-style: normal; color: #666; }
+
+.win__foot{
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 7px 4px 3px;
+}
+
+.win__push{
+  min-width: 76px;
+  padding: 4px 12px;
+  font: 12px var(--w-font);
+  color: #000;
+  background: var(--w-face);
+  border: 1px solid;
+  border-color: var(--w-light) var(--w-dark) var(--w-dark) var(--w-light);
+  box-shadow: inset -1px -1px 0 var(--w-shadow);
+  cursor: pointer;
+}
+.win__push:active{
+  border-color: var(--w-dark) var(--w-light) var(--w-light) var(--w-dark);
+  box-shadow: none;
+  padding: 5px 11px 3px 13px;
+}
+
+.win__grip{
+  position: absolute;
+  right: 1px; bottom: 1px;
+  width: 14px; height: 14px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background:
+    linear-gradient(135deg, transparent 45%, var(--w-shadow) 45% 55%, transparent 55%) no-repeat,
+    linear-gradient(135deg, transparent 70%, var(--w-shadow) 70% 80%, transparent 80%) no-repeat;
+}
+
+/* ------------------------------------------------------------
+   Right-click menu
+   ------------------------------------------------------------ */
+
+.mini__menu{
+  position: absolute;
+  z-index: 900;
+  min-width: 150px;
+  padding: 2px;
+  background: var(--w-face);
+  border: 1px solid;
+  border-color: var(--w-light) var(--w-dark) var(--w-dark) var(--w-light);
+  box-shadow: inset -1px -1px 0 var(--w-shadow), 2px 2px 3px rgba(0,0,0,.35);
+  font-size: 12px;
+}
+.mini__menu button{
+  display: block;
+  width: 100%;
+  padding: 3px 22px 3px 24px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: #000;
+  text-align: left;
+  cursor: default;
+}
+.mini__menu button:hover{ background: var(--w-select); color: #fff; }
+.mini__menu button:disabled{ color: var(--w-shadow); }
+.mini__menu button:disabled:hover{ background: none; color: var(--w-shadow); }
+.mini__menu hr{
+  margin: 3px 2px;
+  border: 0;
+  border-top: 1px solid var(--w-shadow);
+  border-bottom: 1px solid var(--w-light);
+}
+
+/* ------------------------------------------------------------
+   CRT treatment
+   ------------------------------------------------------------
+   Sits over everything so the flat UI below picks up the tube's
+   phosphor grille, scanlines, corner falloff and the purple
+   fringe visible in the original artwork.
+   ------------------------------------------------------------ */
+
+.mini__crt{
+  position: absolute;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Layer 1 — the macro shot of a real RGB phosphor matrix.
+   The source is fully saturated red/green/blue stripes, so it has to be
+   tiled coarse and multiplied gently: tile it fine and the stripes land
+   near one screen pixel and moire; push the opacity and multiply simply
+   kills two of the three channels everywhere. 320px puts one triad at
+   about 3.5px on this grid, which survives the zoom scale intact. */
+.mini__crt::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("../assets/desktop/lcd-matrix.avif") repeat;
+  background-size: 320px 320px;
+  mix-blend-mode: multiply;
+  opacity: .16;
+}
+
+/* Layer 2 — scanlines, top fringe, corner falloff. */
+.mini__crt::after{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(rgba(20,16,8,.10) 0 1px, rgba(0,0,0,0) 1px 3px),
+    linear-gradient(rgba(176,138,196,.20) 0%, rgba(176,138,196,0) 12%),
+    radial-gradient(118% 118% at 50% 45%,
+      rgba(255,247,216,.10) 0%,
+      rgba(255,247,216,0)   50%,
+      rgba(28,22,10,.34)   100%);
+}

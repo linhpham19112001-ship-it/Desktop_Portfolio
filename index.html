@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nhat Linh Portfolio</title>
+<meta name="description" content="An interactive desk. Hover to reveal, click to explore.">
+<!-- mini.css first: it is the component layer (the .win chrome, the --w-*
+     palette). styles.css is the page layer and must be able to override it
+     at equal specificity — e.g. .mailer__body over .win__body. -->
+<link rel="stylesheet" href="css/mini.css">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/work.css">
+<link rel="stylesheet" href="css/flow.css">
+</head>
+<body>
+
+<div class="viewport" id="viewport">
+  <div class="stage" id="stage">
+    <!-- Everything the desk lamp lights — dimmed as a block when the lamp
+         is switched off. The glow canvas and cursor tip stay outside this,
+         so hover/select feedback stays legible even in the dark. -->
+    <div class="scene" id="scene">
+      <img class="bg" id="bg" src="assets/scene/desktop_0012_Backgroud.webp" alt="A lamp-lit desk with a CRT computer, books, a camera and a phone.">
+      <!-- object layers are injected here by app.js -->
+
+      <!-- A printed sticky pointing at the shelf — decoration, not a
+           hotspot. Deliberately outside ITEMS in app.js: it is not in the
+           hitmap, does not hover/highlight, opens nothing, and does not
+           count toward discovery. A plain painted-on label, same as the
+           spine text on the books themselves.
+           Position is that exact sticky's own box in the 4096 x 2287
+           artwork — 728, 1644, 201 x 203 — as percentages so it tracks the
+           stage at any size. z-index 96 only needs to clear the case
+           layer under it (--z 95); nothing else here overlaps it. Sits
+           inside .scene, unlike .led/.tags, because a printed sticky is
+           part of the artwork and should dim with the desk lamp like any
+           other object on it. -->
+      <img class="note-portfolio" src="assets/scene/note-portfolio.webp" alt="" draggable="false">
+
+      <div class="dim" id="dim"></div>
+    </div>
+    <!-- The tower's power LED. Deliberately a sibling of .scene rather than a
+         child: the desk lamp dims .scene as a block, and a machine that is
+         running should keep running in the dark. Its box is the LED's own
+         footprint in the 4096 x 2287 artwork, measured off the alpha of
+         desktop_0004_case.webp — see .led in css/styles.css. -->
+    <div class="led" id="led" aria-hidden="true"></div>
+
+    <!-- Section labels, off until the corner button asks for them. Outside
+         .scene for the same reason as the LED above: they are the page
+         pointing at things, not part of the artwork, so the desk lamp must
+         not dim them. Filled by buildTags() in js/app.js. -->
+    <div class="tags" id="tags" aria-hidden="true"></div>
+
+    <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+    <div class="tip" id="tip" aria-hidden="true"><span class="tip__label"></span><span class="tip__cta">click</span></div>
+  </div>
+</div>
+
+<header class="hud">
+  <div class="hud__brand">
+    <span class="hud__dot"></span>
+    <span class="hud__title">NHAT&nbsp;LINH&nbsp;PORTFOLIO</span>
+  </div>
+  <div class="hud__score">
+    <span class="hud__scoreLabel">DISCOVERED</span>
+    <span class="hud__scoreNum"><b id="found">0</b>&thinsp;/&thinsp;<i id="total">0</i></span>
+    <div class="hud__pips" id="pips"></div>
+  </div>
+</header>
+
+<button class="zoomout" id="zoomout" type="button">&larr;&ensp;Zoom out&ensp;<kbd>Esc</kbd></button>
+
+<p class="hint" id="hint"><kbd>Hover</kbd> to reveal &middot; <kbd>Click</kbd> to open &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> to browse &middot; <kbd>Esc</kbd> to close</p>
+
+<!-- Names every section at once, for anyone who would rather read the desk
+     than poke at it. Off by default — finding things is the point. -->
+<!-- role="switch" + aria-checked, not a plain pressed button: it reads as a
+     two-state switch to a screen reader, which is what it now looks like. -->
+<button class="labels" id="labels" type="button" role="switch" aria-checked="false">
+  <span class="labels__track" aria-hidden="true"><i class="labels__knob"></i></span>
+  <span class="labels__text">Labels</span>
+  <kbd>L</kbd>
+</button>
+
+<aside class="panel" id="panel" role="dialog" aria-modal="false" aria-labelledby="panelTitle" hidden>
+  <button class="panel__close" id="panelClose" aria-label="Close">&times;</button>
+  <p class="panel__cat" id="panelCat"></p>
+  <h2 class="panel__title" id="panelTitle"></h2>
+  <p class="panel__desc" id="panelDesc"></p>
+  <ul class="panel__tags" id="panelTags"></ul>
+  <a class="panel__cta" id="panelCta" href="#">Open<span aria-hidden="true">&nbsp;&rarr;</span></a>
+  <div class="panel__nav">
+    <button type="button" data-step="-1" aria-label="Previous item">&larr;</button>
+    <button type="button" data-step="1" aria-label="Next item">&rarr;</button>
+  </div>
+</aside>
+
+<!-- Keyboard / screen-reader access to every hotspot -->
+<nav class="srnav" id="srnav" aria-label="Objects on the desk"></nav>
+
+<div class="loader" id="loader">
+  <div class="loader__inner">
+    <div class="loader__bar"><i id="loaderFill"></i></div>
+    <p class="loader__text">Warming up the lamp&hellip; <span id="loaderPct">0%</span></p>
+  </div>
+</div>
+
+<!-- ============================================================
+     The mini desktop shown inside the CRT. Cloned into the screen
+     layer by app.js, clipped by desktop_0000_monitor-2.png.
+     Everything below is authored on a 906 x 702 pixel grid.
+     ============================================================ -->
+<template id="miniTpl">
+  <div class="mini">
+
+    <!-- Desktop surface: wallpaper + icons + windows. Icons are injected by
+         mini.js from its ICONS table so positions stay data-driven. -->
+    <div class="mini__desk">
+      <img class="mini__wall" src="assets/desktop/wallpaper.webp" alt="" draggable="false">
+      <div class="mini__icons"></div>
+      <div class="mini__windows"></div>
+      <div class="mini__menu" hidden></div>
+    </div>
+
+    <!-- Phosphor grille, scanlines, bloom and the purple fringe along the
+         top edge that the artwork already has. Never takes a click. -->
+    <div class="mini__crt"></div>
+  </div>
+</template>
+
+<!-- The portfolio shelf: one of these per book on the left of the desk.
+     Populated by js/work.js from its WORK table. -->
+<div class="work" id="work" role="dialog" aria-modal="true" aria-labelledby="workTitle" hidden>
+  <div class="work__backdrop" data-work-close></div>
+
+  <div class="work__sheet">
+    <header class="work__head">
+      <p class="work__cat">From the shelf</p>
+      <h2 class="work__title" id="workTitle"></h2>
+      <p class="work__blurb" id="workBlurb"></p>
+      <p class="work__count" id="workCount"></p>
+      <button class="work__close" type="button" data-work-close aria-label="Close">&times;</button>
+    </header>
+
+    <div class="work__body">
+      <nav class="work__list" id="workList" aria-label="Projects"></nav>
+      <section class="work__detail">
+        <!-- Name spans the full width on its own row, so the row below it
+             — facts (`meta`) and tools on the left, its own words (`desc`)
+             on the right — starts level with `desc`, not with the name.
+             Either side that hasn't been filled in yet says so instead of
+             sitting blank — see setMeta / setTools / setDesc in js/work.js. -->
+        <div class="work__detailHead">
+          <h3 class="work__name" id="workName"></h3>
+          <div class="work__factsRow">
+            <div class="work__info">
+              <dl class="work__meta" id="workMeta"></dl>
+              <div class="work__tools" id="workTools"></div>
+            </div>
+            <p class="work__desc" id="workDesc"></p>
+          </div>
+        </div>
+        <div class="work__grid" id="workGrid"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="work__lightbox" id="workLightbox" hidden>
+    <button class="work__lbClose" id="workLbClose" type="button" aria-label="Close">&times;</button>
+    <button class="work__lbNav work__lbNav--prev" id="workLbPrev" type="button" aria-label="Previous">&larr;</button>
+    <img id="workLbImg" alt="">
+    <button class="work__lbNav work__lbNav--next" id="workLbNext" type="button" aria-label="Next">&rarr;</button>
+    <p class="work__lbCount" id="workLbCount"></p>
+  </div>
+</div>
+
+<!-- The camera opens the same #work shelf as the books, on its own flat
+     'photography' category (see WORK in js/work.js) — no separate markup
+     needed here. -->
+
+<!-- The phone's contact card: every channel in one place. The sticky note
+     next to it writes a message; this one just hands over the addresses.
+     Rows are built by js/contacts.js from its CHANNELS table. -->
+<div class="hub" id="hub" role="dialog" aria-modal="true" aria-labelledby="hubName" hidden>
+  <div class="hub__backdrop" data-hub-close></div>
+
+  <div class="hub__card">
+    <button class="hub__close" type="button" data-hub-close aria-label="Close">&times;</button>
+
+    <header class="hub__head">
+      <p class="hub__cat">Contact</p>
+      <h2 class="hub__name" id="hubName"></h2>
+      <p class="hub__role" id="hubRole"></p>
+      <p class="hub__status" id="hubStatus"></p>
+    </header>
+
+    <div class="hub__rows" id="hubRows"></div>
+
+    <p class="hub__note" id="hubNote" role="status"></p>
+  </div>
+</div>
+
+<!-- The workflow the PC case opens: six components wired as one signal
+     path, each standing for a stage of the work. Deliberately NOT a panel
+     — it is a bare diagram on the blurred desk, no sheet around it. The
+     parts are built by js/flow.js from its STEPS table; the serpentine,
+     the traces and the hover writing all live in css/flow.css. -->
+<div class="flow" id="flow" role="dialog" aria-modal="true" aria-labelledby="flowTitle" hidden>
+  <div class="flow__backdrop" data-flow-close></div>
+
+  <button class="flow__close" type="button" data-flow-close aria-label="Close">&times;</button>
+
+  <div class="flow__stage">
+    <header class="flow__head">
+      <p class="flow__cat">Under the hood</p>
+      <h2 class="flow__title" id="flowTitle">Workflow<span class="flow__hint">
+        — power in one end, something finished out the other. Point at a part.</span></h2>
+    </header>
+
+    <div class="flow__board" id="flowBoard" aria-label="Workflow steps"></div>
+  </div>
+</div>
+
+<!-- The contact form the sticky note opens. Styled like the desk's own
+     .panel (dark glass, amber accent) rather than the mini desktop's
+     Windows chrome — this is the page talking to you, not the machine. -->
+<div class="mailer" id="mailer" role="dialog" aria-modal="true" aria-labelledby="mailerTitle" hidden>
+  <div class="mailer__backdrop" data-close></div>
+  <form class="mailer__win" id="mailerForm" autocomplete="on">
+    <button class="mailer__close" type="button" data-close aria-label="Close">&times;</button>
+
+    <p class="mailer__cat">Say hello</p>
+    <h2 class="mailer__title" id="mailerTitle">Contact for a job</h2>
+    <p class="mailer__desc">This opens your own mail app — nothing is stored here.</p>
+
+    <div class="mailer__fields">
+      <label class="mailer__field">
+        <span>From</span>
+        <input type="email" name="from" required placeholder="you@studio.com">
+      </label>
+      <label class="mailer__field">
+        <span>Subject</span>
+        <input type="text" name="subject" required value="A job for you">
+      </label>
+      <label class="mailer__field mailer__field--area">
+        <span>Message</span>
+        <textarea name="body" rows="6" required placeholder="Tell me what you are building and when you need it."></textarea>
+      </label>
+    </div>
+
+    <p class="mailer__note" id="mailerNote"></p>
+
+    <div class="mailer__actions">
+      <button class="mailer__cta" type="submit">Send<span aria-hidden="true">&nbsp;&rarr;</span></button>
+      <button class="mailer__cancel" type="button" data-close>Cancel</button>
+    </div>
+  </form>
+</div>
+
+<script src="js/hitmap.js"></script>
+<script src="js/mini.js"></script>
+<script src="js/work.js"></script>
+<script src="js/flow.js"></script>
+<!-- contacts.js before app.js: it publishes CONTACT_EMAIL, which the sticky
+     note's mailto form reads so there is only one address to keep current. -->
+<script src="js/contacts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,781 @@
+/* ============================================================
+   Portfolio shelf — the gallery the four books open.
+   Same dark-glass language as .panel and .mailer in styles.css:
+   this is the page speaking, not the machine in the monitor.
+   ============================================================ */
+
+.work{
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+  font-family: var(--font);
+}
+.work.is-open{ opacity: 1; }
+.work[hidden]{ display: none; }
+
+.work__backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(6,8,5,.76);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.work__sheet{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1400px, calc(100vw - 2.5rem));
+  height: min(720px, calc(100vh - 2.5rem));
+  border-radius: 1.25rem;
+  background: var(--panel-bg);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid var(--panel-line);
+  box-shadow: 0 30px 80px rgba(0,0,0,.55);
+  color: var(--ink);
+  overflow: hidden;
+  transform: translateY(12px) scale(.985);
+  transition: transform .34s var(--ease);
+}
+.work.is-open .work__sheet{ transform: none; }
+
+/* ---- header ------------------------------------------------- */
+
+.work__head{
+  flex: none;
+  position: relative;
+  padding: clamp(1.2rem, 2.2vw, 1.7rem) clamp(1.3rem, 2.4vw, 2rem) 1.1rem;
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.work__cat{
+  margin: 0 0 .45rem;
+  font: 700 11px/1 var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.work__title{
+  margin: 0 0 .35rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+  font-weight: 500;
+  letter-spacing: -.015em;
+  line-height: 1.1;
+}
+
+.work__blurb{
+  margin: 0;
+  max-width: 62ch;
+  font-size: .88rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+
+.work__count{
+  position: absolute;
+  right: clamp(3.4rem, 5vw, 4.2rem);
+  top: clamp(1.35rem, 2.3vw, 1.85rem);
+  margin: 0;
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.work__close{
+  position: absolute;
+  top: .8rem; right: .9rem;
+  width: 2.1rem; height: 2.1rem;
+  display: grid; place-items: center;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--ink-dim);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+}
+.work__close:hover{ color: var(--ink); background: rgba(255,233,176,.1); }
+
+/* ---- body: project list on the left, shots on the right ----- */
+
+.work__body{
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(180px, 232px) 1fr;
+}
+
+/* The flat book (Freelancer): no project rail, the shots take the whole
+   sheet — see the note in work.js on why this one has no sidebar. */
+.work--flat .work__body{ grid-template-columns: 1fr; }
+.work--flat .work__list{ display: none; }
+
+.work__list{
+  overflow-y: auto;
+  padding: .8rem .6rem 1.2rem;
+  border-right: 1px solid var(--panel-line);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.work__item{
+  flex: none;
+  text-align: left;
+  padding: .62em .8em;
+  border: 0;
+  border-radius: .55rem;
+  background: none;
+  color: var(--ink-dim);
+  font: 500 .88rem/1.35 var(--font);
+  cursor: pointer;
+  transition: color .18s, background .18s;
+}
+.work__item:hover{ color: var(--ink); background: rgba(255,233,176,.06); }
+.work__item.is-on{
+  color: #17190f;
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.work__detail{
+  min-width: 0;
+  overflow-y: auto;
+  padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2.2vw, 1.6rem) 1.6rem;
+}
+
+/* Name spans the full width on its own line; the row below it — facts
+   and words — is `.work__factsRow`, so `desc` lines up with the fact
+   list rather than with the name above it. */
+.work__detailHead{
+  margin: 0 0 1.2rem;
+}
+
+.work__name{
+  margin: 0 0 .9rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.work__name:empty{ margin: 0; }
+
+/* Facts (and tools) on the left, the project's own words on the right.
+   The left column is a fixed measure rather than a fraction of the
+   panel — a two- or three-row fact list should not stretch to match
+   whatever width `desc` happens to want, and pinning it keeps the
+   divider between them landing in the same place project to project. */
+.work__factsRow{
+  display: grid;
+  grid-template-columns: 23rem 1fr;
+  gap: 1.6rem;
+  align-items: start;
+}
+
+/* The fact grid itself. Two to a line rather than one — with the
+   column wide enough to hold a pair, one fact per line would leave
+   most of that width empty. `.work__meta` (a `<dl>`, for the label/value
+   semantics) is `display: contents`: it hands its `.work__metaRow`
+   children straight to THIS grid rather than running one of its own,
+   which is what lets `.work__tools` — a sibling of `.work__meta`, not
+   inside it — share the same two columns as the facts above it. */
+.work__info{
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.2rem;
+}
+
+/* A definition list, not a table — three rows at most, so the extra
+   structure a table brings (headers, borders, alignment machinery)
+   would outweigh what it buys. */
+.work__meta{ display: contents; }
+.work__meta[hidden]{ display: none; }
+
+/* Each label/value pair is its own wrapper (see setMeta() in js/work.js)
+   so a label still sits directly above its own value — a flat
+   dt,dd,dt,dd… list has no way to do that once two facts share a line,
+   since grid auto-placement pairs off whatever is next in the DOM (dt
+   beside dd) rather than row beside row. */
+.work__metaRow{ min-width: 0; }
+
+/* A third fact with no fourth to pair with would otherwise land alone
+   under the FIRST column (plain grid auto-placement fills left to
+   right), leaving Type under Year with an empty gap under Industry —
+   the two facts that read as a pair (the kind of thing, in the field
+   it was made for) end up split across two rows instead of stacked
+   together. `:nth-child(3):last-child` catches exactly the three-fact
+   case — a fourth fact would make it not the last child, and the pair
+   falls back to filling both cells of its own row normally. Both axes
+   are pinned (not just the column) so this fact and `.work__tools`
+   below have fixed, non-overlapping cells regardless of which one the
+   browser's auto-placement pass reaches first. */
+.work__metaRow:nth-child(3):last-child{ grid-column: 2; grid-row: 2; }
+
+.work__meta dt{
+  margin: 0 0 .1rem;
+  font: 700 10px/1 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .8;
+}
+
+.work__meta dd{
+  margin: 0;
+  font-size: .86rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Not filled in yet. One line stands in for the whole list — three
+   placeholder rows here would out-shout the single placeholder line
+   `desc` gets, for a fact list that is meant to be read at a glance.
+   Spans both columns: left in the 2-column grid above, a single item
+   would otherwise land in the first column only and read as if the
+   second one is still loading. */
+.work__metaNote{
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: .82rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  opacity: .55;
+}
+
+/* The project's toolkit — small icons in the gap `.work__metaRow`'s own
+   nth-child rule leaves under Year once Type has been pushed over to
+   sit under Industry (see that rule's comment). Pinned here to the same
+   cell explicitly, rather than trusting auto-placement to land it
+   there: correct for the three-fact shape every project uses today, but
+   a project with four `meta` facts would need this reconsidered before
+   the two could safely share a row — see `tools` in the WORK comment
+   up top. */
+.work__tools{
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.work__tools[hidden]{ display: none; }
+
+.work__tools img{
+  width: 1.3rem;
+  height: 1.3rem;
+  object-fit: contain;
+  opacity: .8;
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
+}
+.work__tools img:hover{
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* The project's own words. The grid column gives it room, not a reading
+   measure — on a wide sheet that column runs past 90 characters a line,
+   well past where a line stops being comfortable to read. `min()` rather
+   than a bare `max-width: 78ch` so the cap only ever narrows the column,
+   never fights it on a phone-width panel where 78ch would overflow. */
+.work__desc{
+  max-width: min(78ch, 100%);
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  white-space: pre-line;      /* blank lines in `desc` become paragraph breaks */
+}
+.work__desc[hidden]{ display: none; }
+
+/* Not written yet. Dimmer and italic so it reads as scaffolding rather
+   than as copy someone approved — the text equivalent of the hatched
+   fill on an empty image slot. */
+.work__desc.is-placeholder{
+  font-style: italic;
+  opacity: .55;
+}
+
+/* ---- the frame rhythm --------------------------------------
+   A project is a campaign, not a contact sheet, so the slots are
+   not all the same size. Six shots to a cycle, in a rhythm that
+   reads the way a laid-out campaign grid does:
+
+     01        key visual, full bleed
+     02 03 04  the three supporting beats
+     05 06     two closers
+
+   Six because it is the smallest number that divides evenly by
+   both 3 (the trio) and 2 (the pair) — five or seven would leave
+   one row ragged.
+
+   A lone cycle can't both stay a sensible size and fill the row —
+   its slots are fractions of whatever width the grid has, so a
+   narrower grid only ever means a narrower single column with
+   dead space either side, never a smaller cycle that fills the
+   row. So fillGrid() in work.js chunks a project's shots into
+   fixed-width `.work__cycle` blocks — one per six shots — and lets
+   them wrap: most projects run twelve shots, two cycles, so two
+   sit side by side and use the row's full width between them,
+   while still holding a size worth looking at. A project short of
+   a full cycle simply stops partway, same as always.
+   ------------------------------------------------------------ */
+
+.work:not(.work--flat):not([data-cat="branding"]) .work__grid{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem;
+}
+
+.work__cycle{
+  flex: 1 1 28rem;
+  max-width: 34rem;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: .8rem;
+}
+
+/* 01 — the key visual. Wide and short so it reads as a banner
+   rather than as a bigger version of the tiles under it. */
+.work__cycle .work__tile:nth-child(1){
+  grid-column: span 6;
+  aspect-ratio: 16 / 6;
+}
+
+/* 02 03 04 — the trio. Square, because three equal beats across
+   is the shape the eye reads as "these belong together".
+
+   span 2, never 3: a trio of span-3 tiles only fits two to a row,
+   which splits the group and leaves the sixth slot stranded alone
+   on a row of its own. The phone breakpoint at the end of this
+   file is where the rhythm is allowed to change shape — nowhere
+   in between. */
+.work__cycle .work__tile:nth-child(2),
+.work__cycle .work__tile:nth-child(3),
+.work__cycle .work__tile:nth-child(4){
+  grid-column: span 2;
+  aspect-ratio: 1 / 1;
+}
+
+/* 05 06 — the pair. Landscape, a half-step between the banner
+   above and the squares, so the cycle lands rather than stops. */
+.work__cycle .work__tile:nth-child(5),
+.work__cycle .work__tile:nth-child(6){
+  grid-column: span 3;
+  aspect-ratio: 3 / 2;
+}
+
+/* Branding runs as one grid across the full width rather than chunking
+   into side-by-side cycles — see the frame comment below for why an
+   unfolding identity is one lane and not a repeating campaign. Twelve
+   columns, no pullback: each frame below is already built to carry the
+   whole width on its own. */
+.work[data-cat="branding"] .work__grid{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: .8rem;
+}
+
+/* ---- branding's own rhythms -----------------------------------
+   An identity is not a campaign. A campaign is a run of equal beats;
+   an identity unfolds — the mark, then what it is applied to, then
+   the system of pieces it produces. So branding does not share the
+   six-slot rhythm above at all, and does not even use ONE rhythm of
+   its own: each project picks a `frame` in its WORK entry
+   (js/work.js), and every frame below reads that project's identity
+   a different way. Which project gets which frame is a content
+   decision, made in the data, not here.
+
+   All three share one move: the wide/narrow pairing pattern proven
+   out below (`identity`'s 02/03) — one tile keeps its aspect-ratio,
+   its partner drops it for `height: 100%` — because the two ratios
+   can never resolve to the same pixel height on their own (the gap
+   between columns is fixed while the columns are fluid, so no ratio
+   choice fixes it) and `aspect-ratio` is bidirectional, so overriding
+   height while a ratio is still set makes the browser solve for
+   width instead and the tile spills past the grid's edge. Whichever
+   frame you add next, reach for this pattern rather than rediscover
+   it — `min-height` alongside it is the floor for when that tile
+   lands on a row with nothing beside it to set the height (the
+   project's shot count stopping mid-cycle).
+
+   Every selector below carries the redundant `.work__grid` purely to
+   outrank the generic six-slot rhythm above — same specificity would
+   leave this depending on source order, a trap for whoever edits
+   next — and is scoped to a specific `[data-frame]`, set by
+   showProject() in js/work.js, so three frames can coexist in this
+   file without fighting each other.
+   ------------------------------------------------------------ */
+
+/* ---- frame: identity -------------------------------------------
+   The mark, then an asymmetric pair, then the system in portrait.
+   Twelve columns is what buys the asymmetry (8+4 and 4+8 do not
+   exist in a six-column grid). Cycle of twelve:
+
+     01           the mark, letterboxed — wide and shallow, because
+                  a logo needs air around it more than it needs size.
+     02 03        the pair — the main application big, one detail
+                  beside it. Unequal on purpose: equal halves read as
+                  a comparison, and these are a subject and its
+                  close-up, not two options.
+     04 05 06     the system, standing up — stationery, packaging and
+                  collateral are all taller than wide.
+
+   The one twist that makes it read as art-directed rather than
+   generated: the wide half of the pair SWAPS SIDES each cycle (02/03
+   here, 08/09 mirrored), so a long project zigzags down the page
+   instead of stacking the same L-shape over and over.
+   ------------------------------------------------------------ */
+
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 1),
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 7){
+  grid-column: span 12;
+  aspect-ratio: 21 / 9;
+}
+
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 2){
+  grid-column: span 8;
+  aspect-ratio: 3 / 2;
+}
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 3){
+  grid-column: span 4;
+}
+
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 8){
+  grid-column: span 4;
+}
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 9){
+  grid-column: span 8;
+  aspect-ratio: 3 / 2;
+}
+
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 3),
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 8){
+  aspect-ratio: auto;
+  min-height: 12rem;
+}
+
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 4),
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 5),
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 6),
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 10),
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 11),
+.work[data-cat="branding"][data-frame="identity"] .work__grid .work__tile:nth-child(12n + 0){
+  grid-column: span 4;
+  aspect-ratio: 3 / 4;
+}
+
+/* ---- frame: mosaic -----------------------------------------------
+   Opens straight into an anchor-and-detail pair — no mark up front,
+   for projects where the strongest shot is an application photo
+   rather than the logotype in isolation. Cycle of seven:
+
+     01 02        anchor (photo-shaped, 4/3) plus a narrower detail
+                  crop beside it — the same pairing move as identity,
+                  just a different width split (7+5, not 8+4) and a
+                  photographic ratio instead of a logo's letterbox.
+     03 04 05 06  an even quartet of squares — four peers, not
+                  identity's trio of three, reading as a set of swatches
+                  rather than a sequence.
+     07           a closing letterboxed banner, so the cycle ends on
+                  the same kind of wide beat identity opens with.
+   ------------------------------------------------------------ */
+
+.work[data-cat="branding"][data-frame="mosaic"] .work__grid .work__tile:nth-child(7n + 1){
+  grid-column: span 7;
+  aspect-ratio: 4 / 3;
+}
+.work[data-cat="branding"][data-frame="mosaic"] .work__grid .work__tile:nth-child(7n + 2){
+  grid-column: span 5;
+  aspect-ratio: auto;
+  min-height: 12rem;
+}
+
+.work[data-cat="branding"][data-frame="mosaic"] .work__grid .work__tile:nth-child(7n + 3),
+.work[data-cat="branding"][data-frame="mosaic"] .work__grid .work__tile:nth-child(7n + 4),
+.work[data-cat="branding"][data-frame="mosaic"] .work__grid .work__tile:nth-child(7n + 5),
+.work[data-cat="branding"][data-frame="mosaic"] .work__grid .work__tile:nth-child(7n + 6){
+  grid-column: span 3;
+  aspect-ratio: 1 / 1;
+}
+
+.work[data-cat="branding"][data-frame="mosaic"] .work__grid .work__tile:nth-child(7n + 0){
+  grid-column: span 12;
+  aspect-ratio: 21 / 9;
+}
+
+/* ---- frame: spotlight --------------------------------------------
+   The leanest of the three — fewer, bigger beats, for a project that
+   reads best as a small number of hero moments rather than a set of
+   application shots. Cycle of four:
+
+     01     a full-bleed hero, wide and photographic (3/2) — a proper
+            image, not identity's letterboxed mark.
+     02 03  an even pair, both square, both keeping their own ratio.
+            Every other frame's pair is asymmetric on purpose; this
+            one is deliberately calm instead, the held beat between
+            two wide moments.
+     04     a second wide beat, letterboxed like a statement.
+
+   Nothing here needs the drop-the-ratio trick: 02 and 03 share the
+   same span AND the same ratio, so they already resolve to the same
+   height without it.
+   ------------------------------------------------------------ */
+
+.work[data-cat="branding"][data-frame="spotlight"] .work__grid .work__tile:nth-child(4n + 1){
+  grid-column: span 12;
+  aspect-ratio: 3 / 2;
+}
+
+.work[data-cat="branding"][data-frame="spotlight"] .work__grid .work__tile:nth-child(4n + 2),
+.work[data-cat="branding"][data-frame="spotlight"] .work__grid .work__tile:nth-child(4n + 3){
+  grid-column: span 6;
+  aspect-ratio: 1 / 1;
+}
+
+.work[data-cat="branding"][data-frame="spotlight"] .work__grid .work__tile:nth-child(4n + 0){
+  grid-column: span 12;
+  aspect-ratio: 21 / 9;
+}
+
+/* The flat book's own layout: a loose scrapbook wall instead of the even
+   catalog grid above — a masonry column flow, photos free to keep their
+   own proportions rather than being cropped to match their neighbours.
+   Runs the grid's own full width (no dead space to either side, unlike
+   the campaign rhythm above, a masonry flow has no fixed-size unit that
+   needs a repeating partner to fill the row with — more columns already
+   does that), so the column counts here run one size class higher than
+   they would need to at a pulled-back width. */
+.work--flat .work__grid{
+  display: block;
+  column-count: 3;
+  column-gap: .8rem;
+}
+@media (min-width: 620px){  .work--flat .work__grid{ column-count: 5; } }
+@media (min-width: 900px){  .work--flat .work__grid{ column-count: 6; } }
+
+.work--flat .work__tile{
+  display: block;
+  width: 100%;
+  aspect-ratio: auto;
+  /* The floor for when a real photo hasn't loaded yet — every project's
+     folders are still placeholders today. */
+  min-height: 140px;
+  margin: 0 0 .8rem;
+  break-inside: avoid;
+}
+.work--flat .work__tile img{ height: auto; }
+
+.work__tile{
+  position: relative;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  border: 1px solid var(--panel-line);
+  border-radius: .7rem;
+  background: rgba(255,233,176,.04);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .22s var(--ease), border-color .22s;
+}
+.work__tile:hover{ transform: translateY(-3px); border-color: rgba(255,233,176,.4); }
+
+.work__tile img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* A slot with no file behind it yet — says which path it wants. */
+.work__tile.is-empty{
+  cursor: default;
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(255,233,176,.05) 0 8px,
+      rgba(255,233,176,.02) 8px 16px);
+}
+.work__tile.is-empty:hover{ transform: none; border-color: var(--panel-line); }
+
+/* Carries both a grid span and a flex basis because it lands in either
+   kind of container: the campaign shelves lay their grid out with flex
+   (see the cycle chunking above), branding and the flat piles with grid.
+   Each container ignores the property meant for the other. */
+.work__empty{
+  grid-column: 1 / -1;
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 2.5rem 0;
+  font-size: .9rem;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  font-style: italic;
+  opacity: .6;
+}
+
+.work__slot{
+  position: absolute;
+  inset: auto .5rem .5rem;
+  font: 500 10px/1.35 var(--mono);
+  color: var(--ink-dim);
+  word-break: break-all;
+  text-align: left;
+}
+
+/* ---- lightbox ----------------------------------------------- */
+
+.work__lightbox{
+  position: fixed;
+  inset: 0;
+  z-index: 1450;
+  display: grid;
+  place-items: center;
+  background: rgba(4,6,4,.9);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity .24s var(--ease);
+}
+.work__lightbox.is-on{ opacity: 1; }
+.work__lightbox[hidden]{ display: none; }
+
+.work__lightbox img{
+  max-width: min(1200px, calc(100vw - 8rem));
+  max-height: calc(100vh - 7rem);
+  border-radius: .6rem;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+}
+
+.work__lbClose,
+.work__lbNav{
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.8rem; height: 2.8rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: var(--ink);
+  background: rgba(255,233,176,.08);
+  border: 1px solid var(--panel-line);
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.work__lbClose:hover,
+.work__lbNav:hover{ background: rgba(255,233,176,.18); }
+
+.work__lbClose{ top: 1.2rem; right: 1.4rem; font-size: 1.5rem; }
+.work__lbNav--prev{ left: 1.4rem;  top: 50%; transform: translateY(-50%); }
+.work__lbNav--next{ right: 1.4rem; top: 50%; transform: translateY(-50%); }
+.work__lbNav:hover{ transform: translateY(-50%) scale(1.06); }
+
+.work__lbCount{
+  position: absolute;
+  bottom: 1.3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: .45em .9em;
+  border-radius: 999px;
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .14em;
+  color: var(--ink-dim);
+  background: rgba(10,12,8,.6);
+  border: 1px solid var(--panel-line);
+}
+
+/* ---- narrow screens ----------------------------------------- */
+
+@media (max-width: 760px){
+  .work__sheet{
+    width: calc(100vw - 1rem);
+    height: calc(100vh - 1rem);
+  }
+  /* Facts above words rather than side by side — a 23rem fact column
+     would eat almost the entire phone-width panel and leave no room
+     for desc at all. The fact grid itself stays two columns (the base
+     rule above): "2022 – 2024" / "Education" / "Brand identity" are
+     short enough that a phone-width column still fits either one. */
+  .work__factsRow{
+    grid-template-columns: 1fr;
+    gap: .9rem;
+  }
+  .work__body{
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .work__list{
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--panel-line);
+    padding: .7rem .8rem;
+  }
+  .work__item{ white-space: nowrap; }
+
+  /* No room to run cycles side by side on a phone, so each one takes
+     the full row (flex-basis 100% beats the desktop 28rem, still one
+     `.work__grid` so no extra selector is needed to win here) and
+     collapses to two columns internally — "banner, then everything
+     else paired". A trio across a phone would put three ~110px tiles
+     on a row, which is smaller than the placeholder path printed
+     inside them. */
+  .work__cycle{
+    flex-basis: 100%;
+    max-width: none;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .work__cycle .work__tile:nth-child(2),
+  .work__cycle .work__tile:nth-child(3),
+  .work__cycle .work__tile:nth-child(4),
+  .work__cycle .work__tile:nth-child(5),
+  .work__cycle .work__tile:nth-child(6){
+    grid-column: span 1;
+    aspect-ratio: 1 / 1;
+  }
+  .work__cycle .work__tile:nth-child(1){
+    grid-column: span 2;
+    aspect-ratio: 16 / 9;
+  }
+
+  /* All three branding frames collapse to the same two columns,
+     dropping every one of their distinctions — identity's zigzag,
+     mosaic's quartet, spotlight's even pair all need width to read,
+     and a phone does not have it. Rather than write a mobile special
+     case for each frame's "which slot is the wide one" (three
+     different cycle lengths, three different answers), all three
+     fall back to one plain portrait grid: simpler to read, and
+     nothing is lost that a phone-width screen could have shown off
+     anyway.
+
+     The frame-specific desktop rules (e.g.
+     `[data-frame="identity"] … :nth-child(12n + 1)`) carry 6
+     class/attribute/pseudo-class components — specificity 60. A
+     single `:nth-child(n)` here only reaches 5 (this rule has no
+     `[data-frame="…"]` of its own to match against), so the desktop
+     rule would still win on every viewport, tiles would keep their
+     wide desktop spans, and a two-column grid would quietly grow
+     implicit columns to fit them: a slot collapses to a sliver and
+     the whole category falls apart. Repeating `:nth-child(n)` adds a
+     second pseudo-class component — each occurrence counts toward
+     specificity even when redundant — bringing this rule to 60 too;
+     tied specificity falls back to source order, and this rule comes
+     later in the file, so it wins. A plain descendant selector is
+     NOT enough here. */
+  .work[data-cat="branding"] .work__grid{ grid-template-columns: repeat(2, 1fr); }
+  .work[data-cat="branding"] .work__grid .work__tile:nth-child(n):nth-child(n){
+    grid-column: span 1;
+    aspect-ratio: 3 / 4;
+    min-height: 0;
+  }
+
+  .work__lbNav{ width: 2.4rem; height: 2.4rem; }
+  .work__lightbox img{ max-width: calc(100vw - 6rem); }
+}

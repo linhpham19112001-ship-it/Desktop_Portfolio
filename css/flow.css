@@ -1,0 +1,400 @@
+/* ============================================================
+   Workflow — the diagram the PC case opens.
+
+   Deliberately NOT a panel. Everything else on this desk that
+   opens is a sheet of dark glass with an edge round it; this
+   one is a bare diagram sitting straight on the blurred desk,
+   because a schematic with a frame drawn round it stops being
+   a schematic and starts being a slide. The backdrop blurs
+   harder than the other overlays for the same reason: with no
+   sheet to hold the writing off the artwork, the desk behind
+   has to fall further back on its own.
+   ============================================================ */
+
+.flow{
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+  font-family: var(--font);
+}
+.flow.is-open{ opacity: 1; }
+.flow[hidden]{ display: none; }
+
+/* Fixed, not absolute: the stage scrolls on a short screen and the
+   backdrop must stay put underneath it rather than scroll away. */
+.flow__backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(6,8,5,.84);
+  backdrop-filter: blur(14px) saturate(.9);
+  -webkit-backdrop-filter: blur(14px) saturate(.9);
+}
+
+.flow__close{
+  position: fixed;
+  top: 1.1rem; right: 1.3rem;
+  z-index: 2;
+  width: 2.4rem; height: 2.4rem;
+  display: grid; place-items: center;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--ink-dim);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+}
+.flow__close:hover{ color: var(--ink); background: rgba(255,233,176,.1); }
+
+/* `margin: auto` rather than relying on place-items alone — once the
+   diagram is taller than the window, centred grid items get clipped at
+   the TOP and the first row becomes unreachable. auto margins collapse
+   correctly instead and leave the whole thing scrollable. */
+.flow__stage{
+  position: relative;
+  margin: auto;
+  width: min(1040px, 100%);
+  padding: clamp(1.6rem, 4vh, 3rem) clamp(1.2rem, 4vw, 3rem);
+  transform: translateY(10px);
+  transition: transform .34s var(--ease);
+}
+.flow.is-open .flow__stage{ transform: none; }
+
+/* ---- header ------------------------------------------------- */
+
+.flow__cat{
+  margin: 0 0 .4rem;
+  font: 700 11px/1 var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.flow__title{
+  margin: 0 0 .35rem;
+  font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+  font-weight: 500;
+  letter-spacing: -.015em;
+  line-height: 1.1;
+}
+
+/* The bottom margin here is not decoration — it is the room the top row's
+   writing floats up into. Shrink it and the writing lands on the header.
+
+   The floor is in rem, not vh, and that is the whole point: the writing is
+   four lines of text and stays about 125px tall whatever the window does,
+   so a purely vh-based reserve shrinks exactly when it is needed most and
+   the header gets landed on at 640px. vh only ever adds air on a tall
+   screen. What gives instead on a short one is the artwork — see
+   --art below. */
+.flow__head{
+  margin: 0 0 clamp(9.5rem, 21vh, 11rem);
+}
+
+/* The hint rides on the same line as the title rather than sitting under
+   it as its own paragraph. Two lines of header is two lines the hover
+   text cannot have, and on a short screen that is the difference between
+   the top row's writing clearing the header and landing on top of it. */
+.flow__hint{
+  font-size: .86rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-dim);
+}
+
+/* ---- the board ---------------------------------------------
+   A serpentine, because a straight run of six would either be
+   unreadably small across a screen this wide or need scrolling
+   sideways: 01→02→03 along the top, down the right, then
+   04→05→06 back along the bottom.
+
+   The DOM stays in plain 1..6 order — flow.js never has to know
+   the shape. The reversal is done here by placing the second row
+   in descending columns, so the path doubles back the way a
+   trace on a board actually would.
+
+   The gaps are named because the traces are drawn INTO them and
+   have to match exactly; change one number rather than four.
+   ------------------------------------------------------------ */
+
+.flow__board{
+  --hop-x: 3.4rem;      /* column gap: the horizontal hops live here */
+  --hop-y: 3rem;        /* row gap: the turn at the end of row one   */
+
+  /* How far back from the end of a trace its chevron is anchored. A 7px
+     box rotated 45° puts its point ~4.95px out from its own centre, so
+     anchoring by the box's edge overshoots and the point crosses into the
+     part the trace is aiming at. 9.5px lands it just inside the gap:
+     3.5 (half the box) + 4.95 (the reach) + 1 of clearance. */
+  --tip: 9.5px;
+
+  /* The drawings are what gives on a short screen. The writing above and
+     below cannot shrink — it is a fixed number of lines — so on a 640px-tall
+     window the parts get smaller and everything still fits without the
+     diagram having to scroll. */
+  --art: clamp(3.6rem, 9vh, 5.2rem);
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: var(--hop-x);
+  row-gap: var(--hop-y);
+
+  /* Matches the header's bottom margin: the room the bottom row's
+     writing floats down into. */
+  margin-bottom: clamp(9.5rem, 21vh, 11rem);
+}
+
+.flow__step:nth-child(4){ grid-column: 3; grid-row: 2; }
+.flow__step:nth-child(5){ grid-column: 2; grid-row: 2; }
+.flow__step:nth-child(6){ grid-column: 1; grid-row: 2; }
+
+/* No border, no fill, no padding box — the button is a hit area and an
+   anchor for the traces, nothing more. What you see is the drawing. */
+.flow__step{
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.flow__step:hover,
+.flow__step.is-on{ z-index: 6; }
+.flow__step:focus{ outline: none; }
+
+/* This is what grows. Not the button: the traces are the button's
+   pseudo-elements, and scaling them would push a trace past its gap and
+   into the part it points at. */
+.flow__body{
+  display: grid;
+  justify-items: center;
+  gap: .5rem;
+  color: var(--ink-dim);
+  transform-origin: 50% 50%;
+  transition: transform .3s cubic-bezier(.2,.7,.3,1), color .25s var(--ease);
+}
+.flow__step:hover .flow__body,
+.flow__step.is-on .flow__body{
+  transform: scale(1.12);
+  color: var(--accent);
+}
+.flow__step:focus-visible .flow__body{ color: var(--accent); }
+
+.flow__tag{
+  font: 700 10px/1 var(--mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+
+.flow__art{
+  display: block;
+  width: 100%;
+  max-width: var(--art, 5.2rem);
+}
+.flow__art svg{ display: block; width: 100%; height: auto; }
+
+.flow__stepName{
+  font-size: .95rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  transition: color .25s var(--ease);
+}
+.flow__step:hover .flow__stepName,
+.flow__step.is-on .flow__stepName{ color: var(--ink); }
+
+/* ---- the writing -------------------------------------------
+   Floated clear of the diagram rather than laid over it: the top
+   row's text rises into the gap under the header, the bottom
+   row's drops into the gap below the board. Nothing is ever
+   covered, so no plate or blur is needed behind the words — and
+   not needing one is what keeps this a diagram instead of six
+   little panels.
+
+   Taken out of flow so appearing costs the board no layout: the
+   parts do not shift when you point at one.
+   ------------------------------------------------------------ */
+
+.flow__info{
+  position: absolute;
+  left: 50%;
+  /* Wider than reading measure would normally want, on purpose: every
+     line saved here is vertical room the diagram gets to keep, and the
+     text is four short lines rather than a paragraph you settle into. */
+  width: min(36ch, 76vw);
+  display: grid;
+  gap: .3rem;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(5px);
+  transition: opacity .26s var(--ease), transform .26s var(--ease),
+              visibility 0s linear .26s;
+  pointer-events: none;
+}
+.flow__step:hover .flow__info,
+.flow__step.is-on .flow__info{
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition-delay: 0s;
+}
+
+.flow__step:nth-child(-n+3) .flow__info{ bottom: calc(100% + 1.1rem); }
+.flow__step:nth-child(n+4)  .flow__info{ top:    calc(100% + 1.1rem); }
+
+.flow__role{
+  font-size: .9rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+
+.flow__desc{
+  font-size: .82rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+
+/* The spec line is the joke landing: PC-spec grammar, numbers about the
+   work. Mono and dim so it reads as a footnote on the part. */
+.flow__spec{
+  margin-top: .25rem;
+  font: 500 10px/1.5 var(--mono);
+  letter-spacing: .04em;
+  color: var(--ink-dim);
+  opacity: .75;
+}
+
+/* ---- the traces --------------------------------------------
+   Each part draws the hop LEAVING it — ::after is the line,
+   ::before the chevron at its far end. That is why `is-done`
+   (every part before the live one) is what lights them: the
+   path fills in exactly as far as the cursor has reached, and
+   the last part draws nothing because nothing leaves it.
+
+   They live in the grid gap rather than inside the button, so
+   they never take space from the drawing and never need a part
+   to know how wide its neighbour is.
+   ------------------------------------------------------------ */
+
+.flow__step::after,
+.flow__step::before{
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  transition: background .3s var(--ease), border-color .3s var(--ease);
+}
+
+.flow__step::after{ background: var(--panel-line); }
+.flow__step::before{
+  width: 7px; height: 7px;
+  border-top: 2px solid var(--panel-line);
+  border-right: 2px solid var(--panel-line);
+}
+
+.flow__step.is-done::after{ background: var(--accent); }
+.flow__step.is-done::before{ border-color: var(--accent); }
+
+/* 01 02 — hops right, along the top row */
+.flow__step:nth-child(1)::after,
+.flow__step:nth-child(2)::after{
+  top: 50%; left: 100%;
+  width: var(--hop-x); height: 2px;
+  transform: translateY(-50%);
+}
+.flow__step:nth-child(1)::before,
+.flow__step:nth-child(2)::before{
+  top: 50%; left: calc(100% + var(--hop-x) - var(--tip));
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* 03 — the turn: straight down the right-hand column */
+.flow__step:nth-child(3)::after{
+  left: 50%; top: 100%;
+  width: 2px; height: var(--hop-y);
+  transform: translateX(-50%);
+}
+.flow__step:nth-child(3)::before{
+  left: 50%; top: calc(100% + var(--hop-y) - var(--tip));
+  transform: translateX(-50%) rotate(135deg);
+}
+
+/* 04 05 — hops back left, along the bottom row */
+.flow__step:nth-child(4)::after,
+.flow__step:nth-child(5)::after{
+  top: 50%; right: 100%;
+  width: var(--hop-x); height: 2px;
+  transform: translateY(-50%);
+}
+.flow__step:nth-child(4)::before,
+.flow__step:nth-child(5)::before{
+  top: 50%; right: calc(100% + var(--hop-x) - var(--tip));
+  transform: translateY(-50%) rotate(-135deg);
+}
+
+/* 06 — end of the path, nothing leaves it */
+.flow__step:nth-child(6)::after,
+.flow__step:nth-child(6)::before{ display: none; }
+
+/* ---- narrow screens -----------------------------------------
+   One column, every hop turned downward, and the writing back in
+   normal flow: a phone has no hover, so the text arrives on a tap
+   and pushing the parts below it down is the honest thing to do —
+   floating it would just cover the next part instead.
+
+   Every override here carries `:nth-child(n)` to reach the same
+   specificity as the `:nth-child(N)` rules above. Without it those
+   win outright, the sideways traces stay put, and they end up drawn
+   across the middle of a part that is now underneath rather than
+   beside.
+   ------------------------------------------------------------ */
+
+@media (max-width: 760px){
+  .flow__board{
+    --hop-y: 2.2rem;
+    grid-template-columns: 1fr;
+    margin-bottom: 2rem;
+  }
+  .flow__head{ margin-bottom: 2.5rem; }
+
+  .flow__step:nth-child(4),
+  .flow__step:nth-child(5),
+  .flow__step:nth-child(6){ grid-column: 1; grid-row: auto; }
+
+  .flow__step:nth-child(n)::after{
+    top: 100%; left: 50%; right: auto;
+    width: 2px; height: var(--hop-y);
+    transform: translateX(-50%);
+  }
+  .flow__step:nth-child(n)::before{
+    top: calc(100% + var(--hop-y) - var(--tip)); left: 50%; right: auto;
+    transform: translateX(-50%) rotate(135deg);
+  }
+  .flow__step:nth-child(6)::after,
+  .flow__step:nth-child(6)::before{ display: none; }
+
+  /* display, not opacity: hidden-but-present would hold its full height
+     open under every part and stretch the column to nothing but gaps. */
+  .flow__step:nth-child(n) .flow__info{
+    position: static;
+    display: none;
+    width: auto;
+    margin-top: .9rem;
+    transform: none;
+  }
+  .flow__step.is-on .flow__info{ display: grid; }
+
+  /* Nothing to grow into on a single column, and a scaled part would
+     collide with the trace running past it. */
+  .flow__step:hover .flow__body,
+  .flow__step.is-on .flow__body{ transform: none; }
+}
