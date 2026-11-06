@@ -195,21 +195,45 @@
     const url = el('span', 'swarm__url', chrome);
     url.textContent = p.link ? p.link.replace(/^https?:\/\//, '') : (p.slug || 'local') + '.localhost';
     const status = el('span', 'swarm__status', chrome);
+    // A way out to the real site, for every landing that has a `link`.
+    if (p.link){
+      const go = el('a', 'swarm__go', chrome);
+      go.href = p.link;
+      go.target = '_blank';
+      go.rel = 'noopener';
+      go.textContent = 'Visit site ↗';
+      go.title = p.link;
+    }
     const page = el('div', 'swarm__page', win);
     const canvas = el('div', 'swarm__canvas', page);
-    const log = el('div', 'swarm__log', wrap);
-
-    const say = (who, msg) => {
-      const line = el('div', 'swarm__line', log);
-      line.innerHTML = '<b></b> <span></span>';
-      line.firstChild.textContent = who.name.toLowerCase();
-      line.firstChild.style.color = who.color;
-      line.lastChild.textContent = msg;
-      while (log.children.length > 5) log.firstChild.remove();
-    };
+    // The running log under the window ("gemini duplicate badge" …) was removed
+    // (06/11) so the site preview gets the full height; say() stays as a no-op
+    // so the build steps keep their `log` labels for reading the code.
+    const say = () => {};
 
     status.textContent = 'building';
     wrap.classList.add('is-building');
+
+    // Start loading the screenshot now, while the crew draws, so it is
+    // ready the instant the last stroke lands — no gap before the slide.
+    let ready = Promise.resolve(null);
+    if (shot){
+      const pre = new Image();
+      pre.className = 'swarm__shot';
+      pre.alt = p.name;
+      // Decode it too while the crew draws: a tall screenshot decoded only
+      // when it is inserted froze the page for about a second right after
+      // the last stroke. decode() can sit unresolved in a background tab,
+      // so it races a short timeout and never holds the slide back.
+      ready = new Promise(res => {
+        pre.onload = () => {
+          const decoded = pre.decode ? pre.decode().catch(() => {}) : Promise.resolve();
+          Promise.race([decoded, sleep(2500)]).then(() => res(pre));
+        };
+        pre.onerror = () => res(null);
+      });
+      pre.src = shot;
+    }
 
     const jobs = WIRES[p.slug] || generic(p);
     const crew = CREW.map(m => ({ ...m, node: cursorEl(m, canvas) }));
@@ -219,7 +243,7 @@
       while (alive() && next < jobs.length){
         const j = jobs[next++];
         say(m, j.log);
-        await moveTo(m.node, j.x, j.y, reduced ? 0 : 480 + Math.random() * 360);
+        await moveTo(m.node, j.x, j.y, reduced ? 0 : 340 + Math.random() * 240);
         if (!alive()) return;
 
         if (j.t === 'text'){
@@ -236,7 +260,7 @@
           t.style.setProperty('--c', m.color);
           if (reduced){ t.textContent = j.text; continue; }
           t.classList.add('is-typing');
-          const step = Math.max(12, Math.min(50, 1000 / j.text.length));
+          const step = Math.max(10, Math.min(38, 700 / j.text.length));
           for (let k = 1; k <= j.text.length && alive(); k++){
             t.textContent = j.text.slice(0, k);
             await sleep(step);
@@ -246,58 +270,55 @@
           const r = rectNode(j, m, canvas);
           if (j.t === 'dup') r.classList.add('is-dup');
           if (!reduced){
-            moveTo(m.node, j.x + j.w, j.y + j.h, 600);
+            moveTo(m.node, j.x + j.w, j.y + j.h, 460);
             await play(r, [{ clipPath: 'inset(0 100% 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }],
-                       600, 'cubic-bezier(.3,.7,.2,1)');
+                       460, 'cubic-bezier(.3,.7,.2,1)');
           }
           r.classList.add('is-set');
         }
-        await sleep(reduced ? 0 : 90);
+        await sleep(reduced ? 0 : 40);
       }
     }
 
     // Staggered entrance, then everyone pulls from the same queue.
-    await Promise.all(crew.map((m, i) => sleep(reduced ? 0 : i * 160).then(() => work(m))));
+    await Promise.all(crew.map((m, i) => sleep(reduced ? 0 : i * 120).then(() => work(m))));
     if (!alive()) return;
 
-    // Done: the crew drifts off and the drawing holds a beat, finished.
-    crew.forEach((m, i) => moveTo(m.node, 1300 - i * 90, 1120, 700));
-    status.textContent = 'built';
+    // Done: the crew drifts off while the real site slides straight in —
+    // one continuous motion from the last stroke to the slideshow.
+    crew.forEach((m, i) => moveTo(m.node, 1300 - i * 90, 1120, 600));
     wrap.classList.remove('is-building');
     wrap.classList.add('is-done');
-    say(crew[1], shot ? 'render screenshot' : 'build complete — screenshot pending');
-    if (!shot) return;
-    await sleep(reduced ? 0 : 1100);
+    const img = await ready;
     if (!alive()) return;
+    if (!img){
+      status.textContent = 'built';
+      say(crew[1], 'build complete — screenshot pending');
+      return;
+    }
 
-    // Then the real site scans in over it and starts its slow slideshow.
-    const img = el('img', 'swarm__shot', null);
-    img.alt = p.name;
-    img.onload = async () => {
-      if (!alive()) return;
-      // The site goes in UNDER the drawing; the drawing is then cut away
-      // from the top down, with a bright edge leading the cut, so the real
-      // page slides into view exactly where its wireframe was.
-      page.insertBefore(img, canvas);
-      status.textContent = 'live';
-      if (!reduced){
-        const h = page.clientHeight;
-        const wipe = el('div', 'swarm__wipe', page);
-        const SLIDE = 1500, EASE = 'cubic-bezier(.65,0,.25,1)';
-        await Promise.all([
-          play(canvas, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: `inset(${h}px 0 0 0)` }], SLIDE, EASE),
-          play(wipe, [{ transform: 'translateY(0)' }, { transform: `translateY(${h}px)` }], SLIDE, EASE)
-        ]);
-        wipe.remove();
-      }
-      if (!alive()) return;
-      canvas.remove();
-      page.classList.add('has-shot');
-      say(crew[0], 'scroll the live site');
-      await sleep(reduced ? 0 : 1600);
-      if (alive() && !reduced) tour(page, alive);
-    };
-    img.src = shot;
+    // The site goes in UNDER the drawing; the drawing is cut away from the
+    // top down behind a bright edge, so the real page slides into view
+    // exactly where its wireframe was, and keeps scrolling from there.
+    page.insertBefore(img, canvas);
+    status.textContent = 'live';
+    say(crew[1], 'ship it — live site');
+    if (!reduced){
+      const h = page.clientHeight;
+      const wipe = el('div', 'swarm__wipe', page);
+      // Ease-out, not ease-in-out: the old curve barely moved for its first
+      // ~300 ms, which read as a stall right after the drawing finished.
+      const SLIDE = 820, EASE = 'cubic-bezier(.25,.75,.3,1)';
+      await Promise.all([
+        play(canvas, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: `inset(${h}px 0 0 0)` }], SLIDE, EASE),
+        play(wipe, [{ transform: 'translateY(0)' }, { transform: `translateY(${h}px)` }], SLIDE, EASE)
+      ]);
+      wipe.remove();
+    }
+    if (!alive()) return;
+    canvas.remove();
+    page.classList.add('has-shot');
+    if (!reduced) tour(page, alive);
   };
 
   /* A slow auto-scroll down the screenshot — the slideshow. Any wheel,
@@ -307,11 +328,15 @@
     const quit = () => { stop = true; };
     ['wheel', 'pointerdown', 'touchstart', 'keydown'].forEach(e =>
       page.addEventListener(e, quit, { once: true, passive: true }));
-    let last = performance.now(), pos = page.scrollTop;
-    const SPEED = 70;                // px per second
+    const start = performance.now();
+    let last = start, pos = page.scrollTop;
+    const SPEED = 70;                // px per second, once up to speed
     const step = (now) => {
       if (stop || !alive()) return;
-      pos += SPEED * Math.min(.05, (now - last) / 1000);
+      // Ease up to speed over the first second, so the hand-off from the
+      // slide into the scroll has no visible joint.
+      const ramp = Math.min(1, (now - start) / 1000);
+      pos += SPEED * ramp * ramp * Math.min(.05, (now - last) / 1000);
       last = now;
       page.scrollTop = pos;
       if (pos < page.scrollHeight - page.clientHeight - 1) requestAnimationFrame(step);
