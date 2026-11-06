@@ -1,0 +1,268 @@
+/* ============================================================
+   AI flow — the swarm build (js/swarm.js)
+   A darker, more "machine" room than the other shelves: green
+   phosphor accents, a dotted blueprint grid, a browser window
+   that gets built in front of you by a crew of named cursors.
+   ============================================================ */
+
+.work[data-layout="swarm"]{ --ai: #5dffa0; --ai-dim: rgba(93, 255, 160, .16); }
+.work[data-layout="swarm"] .work__detail{ padding: 0; overflow: hidden; }
+.work[data-layout="swarm"] .work__grid{ display: block; height: 100%; }
+
+/* The list reads like a file tree: numbered, monospaced, a green rail. */
+.work[data-layout="swarm"] .work__list{ counter-reset: ai; }
+.work[data-layout="swarm"] .work__item{
+  counter-increment: ai;
+  display: flex;
+  gap: .7em;
+  align-items: baseline;
+}
+.work[data-layout="swarm"] .work__item::before{
+  content: counter(ai, decimal-leading-zero);
+  font: 600 .7rem/1 var(--mono);
+  color: var(--ai);
+  opacity: .55;
+}
+.work[data-layout="swarm"] .work__item.is-on{
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--ai-dim), transparent);
+  box-shadow: inset 2px 0 0 var(--ai);
+}
+.work[data-layout="swarm"] .work__item.is-on::before{ opacity: 1; }
+.work[data-layout="swarm"] .work__infoLink{
+  color: var(--ai);
+  border-bottom-color: rgba(93, 255, 160, .35);
+}
+
+.swarm{
+  position: relative;
+  flex: 1 1 100%;                    /* the shared grid rule makes the host a flex row */
+  width: 100%;
+  height: 100%;
+  min-height: 440px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: .9rem;
+  padding: clamp(1rem, 2.4vw, 2rem);
+  background:
+    radial-gradient(circle, rgba(93, 255, 160, .13) 1px, transparent 1.5px) 0 0 / 22px 22px,
+    radial-gradient(ellipse at 50% 0%, rgba(93, 255, 160, .08), transparent 60%),
+    #070908;
+  overflow: hidden;
+}
+/* A slow scan sweeping down the room while it builds. */
+.swarm::before{
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: -30%;
+  height: 30%;
+  background: linear-gradient(180deg, transparent, rgba(93, 255, 160, .06), transparent);
+  pointer-events: none;
+  opacity: 0;
+}
+.swarm.is-building::before{ opacity: 1; animation: swarmSweep 2.8s linear infinite; }
+@keyframes swarmSweep{ to{ transform: translateY(430%); } }
+
+.swarm__win{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid rgba(93, 255, 160, .2);
+  border-radius: 14px;
+  background: rgba(12, 16, 14, .86);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), 0 30px 60px rgba(0, 0, 0, .5),
+              0 0 40px rgba(93, 255, 160, .06);
+  overflow: hidden;
+  animation: swarmWin .6s var(--ease) both;
+}
+@keyframes swarmWin{ from{ opacity: 0; transform: translateY(14px) scale(.985); } }
+
+.swarm__chrome{
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  height: 2.2rem;
+  padding: 0 .85rem;
+  border-bottom: 1px solid rgba(93, 255, 160, .12);
+  background: rgba(255, 255, 255, .02);
+}
+.swarm__chrome i{
+  width: .55rem; height: .55rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+}
+.swarm__url{
+  flex: 1;
+  margin: 0 .8rem;
+  padding: .3rem .7rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .04);
+  font: 500 .72rem/1 var(--mono);
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.swarm__status{
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font: 700 .62rem/1 var(--mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ai);
+}
+.swarm__status::before{
+  content: "";
+  width: .45rem; height: .45rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+.is-building .swarm__status::before{ animation: swarmPulse .9s ease-in-out infinite; }
+@keyframes swarmPulse{ 50%{ opacity: .2; } }
+
+.swarm__page{ position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.swarm__page.has-shot{ overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(93,255,160,.35) transparent; }
+
+/* The drawing board: the site's own 1440 x 1000 first screen, scaled to
+   the window's width. Container units let the type scale with it. */
+.swarm__canvas{
+  position: relative;
+  z-index: 5;                        /* above the screenshot until it is cut away */
+  background: #0c100e;
+  width: 100%;
+  aspect-ratio: 1440 / 1000;
+  container-type: inline-size;
+  overflow: hidden;
+}
+
+/* Boxes: a dashed outline in the drawer's colour with corner handles
+   while they go down, then they take the site's real fill. */
+.swarm__box{
+  position: absolute;
+  border: 1px dashed var(--c);
+  background: color-mix(in srgb, var(--c) 10%, transparent);
+  transition: border-color .45s, background .45s, box-shadow .45s;
+}
+.swarm__box::before,
+.swarm__box::after{
+  content: "";
+  position: absolute;
+  width: 6px; height: 6px;
+  background: #070908;
+  border: 1px solid var(--c);
+  transition: opacity .35s;
+}
+.swarm__box::before{ left: -4px; top: -4px; }
+.swarm__box::after{ right: -4px; bottom: -4px; }
+/* Settled: a wireframe block — thin green outline, a breath of fill.
+   (--fill / --stroke are only set when WIREFRAME is off in swarm.js.) */
+.swarm__box.is-set{
+  border: 1px solid var(--stroke, rgba(93, 255, 160, .32));
+  background: var(--fill, rgba(93, 255, 160, .035));
+}
+.swarm__box.is-set::before,
+.swarm__box.is-set::after{ opacity: 0; }
+.swarm__box.is-set.has-shadow{ box-shadow: 0 1.2cqw 2.4cqw rgba(0, 0, 0, .14); }
+
+/* A photo still to come: hatched, with a soft light in one corner. */
+.swarm__box--img.is-set{
+  background:
+    linear-gradient(to top right, transparent calc(50% - .5px), rgba(93, 255, 160, .28) 50%, transparent calc(50% + .5px)),
+    linear-gradient(to bottom right, transparent calc(50% - .5px), rgba(93, 255, 160, .28) 50%, transparent calc(50% + .5px)),
+    var(--fill, rgba(93, 255, 160, .03));
+}
+
+.swarm__label{
+  color: rgba(93, 255, 160, .8);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  white-space: pre;
+  opacity: 0;
+  transition: opacity .3s .1s;
+}
+.swarm__box.is-set .swarm__label{ opacity: 1; }
+.swarm__box.is-dup{ animation: swarmDup .5s var(--ease); }
+@keyframes swarmDup{ from{ transform: translate(-3cqw, 1cqw); opacity: .3; } }
+
+.swarm__txt{ position: absolute; white-space: pre-wrap; font-family: var(--font); color: #d8e6dc; }
+[data-font="serif"]{ font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -.01em; }
+[data-font="display"]{ font-family: "Arial Black", Archia, sans-serif; letter-spacing: -.02em; }
+.swarm__txt.is-typing::after{
+  content: "";
+  display: inline-block;
+  width: .45em; height: 1em;
+  margin-left: 2px;
+  vertical-align: -.12em;
+  background: var(--c);
+  animation: swarmPulse .6s steps(1) infinite;
+}
+
+/* The crew. */
+.swarm__cursor{
+  position: absolute;
+  z-index: 5;
+  width: 16px; height: 16px;
+  margin: -2px 0 0 -2px;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .6));
+}
+.swarm__cursor svg{
+  width: 100%; height: 100%;
+  fill: var(--c);
+  stroke: #050605;
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+.swarm__tag{
+  position: absolute;
+  left: 13px; top: 14px;
+  padding: .22rem .45rem;
+  border-radius: 5px;
+  background: var(--c);
+  color: #0b0d0c;
+  font: 700 .6rem/1 var(--mono);
+  white-space: nowrap;
+}
+
+/* The finished screenshot scans in over the wireframe. */
+.swarm__shot{
+  position: absolute;
+  z-index: 4;
+  left: 0; top: 0;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+/* The bright edge that leads the drawing away as the site slides in. */
+.swarm__wipe{
+  position: absolute;
+  z-index: 6;
+  left: 0; right: 0; top: 0;
+  height: 2px;
+  background: var(--ai);
+  box-shadow: 0 0 18px 4px rgba(93, 255, 160, .55);
+  pointer-events: none;
+}
+
+.swarm__log{
+  min-height: 8em;
+  font: 500 .7rem/1.6 var(--mono);
+  color: var(--ink-dim);
+}
+.swarm__line{ animation: swarmLine .3s var(--ease) both; }
+.swarm__line::before{ content: "\203A  "; color: var(--ai); opacity: .6; }
+.swarm__line b{ font-weight: 700; }
+@keyframes swarmLine{ from{ opacity: 0; transform: translateX(-6px); } }
+.swarm.is-done .swarm__line:last-child{ color: var(--ai); }
+
+@media (prefers-reduced-motion: reduce){
+  .swarm *, .swarm::before{ animation: none !important; }
+}

@@ -20,33 +20,32 @@
 
 const ME = {
   name:   'Nhat Linh',
-  role:   'Graphic & Motion Designer',
+  role:   'Brand Designer',
   status: 'Open to freelance and collaboration'
 };
 
 const CHANNELS = [
   { key: 'email',     label: 'Email',     icon: 'mail',
-    value: 'hello@example.com',            href: 'mailto:hello@example.com',
+    value: 'linhpham19112001@gmail.com',   href: 'mailto:linhpham19112001@gmail.com',
     primary: true,  copy: true },
 
   { key: 'phone',     label: 'Phone',     icon: 'phone',
-    value: '+84 00 000 0000',              href: 'tel:+840000000000',
+    value: '0829 838 883',                 href: 'tel:+84829838883',
+    primary: true,  copy: true },
+
+  // Same number as Phone — Zalo is how most people in Vietnam will actually
+  // reach it, so it sits right under it in the top block rather than down
+  // with the social links.
+  { key: 'zalo',      label: 'Zalo',      icon: 'chat',
+    value: '0829 838 883',                 href: 'https://zalo.me/0829838883',
     primary: true,  copy: true },
 
   { key: 'linkedin',  label: 'LinkedIn',  icon: 'linkedin',
-    value: 'linkedin.com/in/username',     href: 'https://linkedin.com/in/username' },
-
-  { key: 'behance',   label: 'Behance',   icon: 'behance',
-    value: 'behance.net/username',         href: 'https://behance.net/username' },
+    value: 'linkedin.com/in/pham-linh-711431325',
+    href: 'https://www.linkedin.com/in/pham-linh-711431325/' },
 
   { key: 'instagram', label: 'Instagram', icon: 'instagram',
-    value: '@username',                    href: 'https://instagram.com/username' },
-
-  { key: 'facebook',  label: 'Facebook',  icon: 'facebook',
-    value: 'facebook.com/username',        href: 'https://facebook.com/username' },
-
-  { key: 'youtube',   label: 'YouTube',   icon: 'youtube',
-    value: 'youtube.com/@username',        href: 'https://youtube.com/@username' }
+    value: '@parro.mood19',                href: 'https://www.instagram.com/parro.mood19/' }
 ];
 
 /* The address the sticky note's form sends to. Read from the table above so
@@ -61,12 +60,10 @@ const MARKS = {
   mail:      '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
   phone:     '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
   linkedin:  '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4V8h4v1.5A6 6 0 0 1 16 8z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>',
-  facebook:  '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
   instagram: '<rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/>',
-  youtube:   '<path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.59.42a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.41 19c1.71.42 8.59.42 8.59.42s6.88 0 8.59-.42a2.78 2.78 0 0 0 1.95-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><path d="m9.75 15.02 5.75-3.27-5.75-3.27v6.54z"/>',
-  // Behance has no line-icon convention worth copying at 17px; a stack of
-  // sheets says "a body of work" and the row label says which site it is.
-  behance:   '<rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 21h9a4 4 0 0 0 4-4V8"/>',
+  // Zalo's own mark is a wordmark that does not survive as a 17px line icon;
+  // a speech bubble says "message me" and the row label says which app.
+  chat:      '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.2 9.2 0 0 1-3.9-.86L3 20.5l1.4-4.1A8 8 0 0 1 3 11.5 8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/>',
   copy:      '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
   done:      '<path d="M20 6 9 17l-5-5"/>',
   open:      '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/>'

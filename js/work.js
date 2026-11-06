@@ -80,18 +80,56 @@
 /* Titles here are the words printed on the spines in the artwork, so the
    gallery header always matches the book the visitor just picked up.
    The `key` is only a folder name under assets/work/ — safe to leave alone. */
+// DEMO ONLY: every Visual Design project points at this one image so the
+// landing layout can be judged on all of them without shipping a dozen
+// copies. Remove `file: DEMO_LANDING[n]` from a project once its real
+// assets/work/visual/<slug>/01.webp exists, and delete this constant once
+// none use it. The dates/roles/descriptions beside it are invented too.
+const DEMO_LANDING = [1, 2, 3, 4].map(n => `assets/work/visual/_demo/landing-${n}.jpg`);
+
+// The Percept board, reused as the starting layout for every Branding
+// project (designer, 06/11: most brand projects will be built like Percept).
+// `board` places each shot at its exact spot on the artwork's own
+// board (image/brand/percept/*_ver03_Grid.png): [shot, x, y, w, h] in
+// the artwork's points, measured inside its outer padding. The board
+// is justified rows, not cells, so every product photo keeps its real
+// ratio and nothing is cropped. Gaps between tiles are the artwork's
+// own 24pt gutter, scaled with the board.
+// A project with fewer pieces simply leaves the later tiles as labelled
+// placeholders; give it its own `board` once its grid artwork exists.
+const BRAND_BOARD = {
+  w: 1944, h: 4662,
+  tiles: [
+    [1,  0,       0,       824.46,  824.46], [2,  848.46,  0,       453.45, 824.46], [3,  1325.91, 0,       618.09, 824.46],
+    [4,  0,       848.46,  1043.31, 613.71], [5,  1067.31, 848.46,  876.69, 613.71],
+    [6,  0,       1486.17, 631.38,  315.69], [7,  0,       1825.86, 631.38, 315.69],
+    [8,  655.38,  1486.17, 543.7,   655.38], [9,  1223.08, 1486.17, 720.92, 655.38],
+    [10, 0,       2165.55, 1490.28, 573.19], [11, 1514.28, 2165.55, 429.72, 573.19],
+    [12, 0,       2762.73, 948,     474],    [13, 972,     2762.73, 474,    474],    [14, 1470,    2762.73, 474,    474],
+    [15, 0,       3260.73, 930.09,  422.77], [16, 954.09,  3260.73, 989.91, 422.77],
+    [17, 0,       3707.5,  933.66,  444.6],  [18, 957.66,  3707.5,  986.34, 444.6],
+    [19, 0,       4176.1,  1944,    486]
+  ]
+};
+
 const WORK = [
   {
     key: 'branding',
     title: 'Branding',
     blurb: 'Identity systems — the part that has to survive a thousand hands.',
+    // Same split as Visual Design: the right pane is only the showcase, and
+    // each project's dates and `desc` open under its name in the list.
+    infoInList: true,
     // `frame` picks this project's grid rhythm — see the "branding frames"
     // block in css/work.css for what each one looks like and why. Every
     // other category just gets the one shared campaign rhythm; branding is
     // the one place different projects are allowed to feel different,
     // because an identity system is not a repeatable ad unit.
     projects: [
-      { name: 'FSEL', slug: 'fsel', shots: 6, frame: 'identity',
+      { name: 'Percept', slug: 'percept', shots: 19, ext: 'jpg', frame: 'bento', desc: '',
+        board: BRAND_BOARD },
+
+      { name: 'FSEL', slug: 'fsel', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,
         meta: [
           { label: 'Year',     value: '2022 – 2024' },
           { label: 'Industry', value: 'Education' },
@@ -100,7 +138,7 @@ const WORK = [
         tools: ['figma', 'illustrator'],
         desc: 'An English centre that fits in a pocket — course, tutor and mock test, all inside the app. The mark had to hold at icon size first and stretch to a launch backdrop second, which is the opposite of the order these usually get drawn in.' },
 
-      { name: 'Khoi', slug: 'khoi', shots: 6, frame: 'mosaic',
+      { name: 'Khoi', slug: 'khoi', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,
         meta: [
           { label: 'Year',     value: '2023' },
           { label: 'Industry', value: 'Personal brand' },
@@ -109,7 +147,7 @@ const WORK = [
         tools: ['illustrator'],
         desc: 'A personal mark for a founder who did not want to look like a company. One glyph, drawn once, used at three sizes and never redrawn — the restraint is the identity.' },
 
-      { name: 'FSEL Japan', slug: 'fsel-japan', shots: 6, frame: 'spotlight',
+      { name: 'FSEL Japan', slug: 'fsel-japan', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,
         meta: [
           { label: 'Year',     value: '2024' },
           { label: 'Industry', value: 'Education' },
@@ -118,7 +156,7 @@ const WORK = [
         tools: ['figma', 'illustrator'],
         desc: 'The same school, aimed at Japan. Most of the system carried over intact; what changed was density — Japanese layouts hold more per centimetre before they read as crowded, so the grid tightened and the mark got more air.' },
 
-      { name: 'Gốm và mình', slug: 'gom-va-minh', shots: 6, frame: 'identity',
+      { name: 'Gốm và mình', slug: 'gom-va-minh', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,
         meta: [
           { label: 'Year',     value: '2022' },
           { label: 'Industry', value: 'Ceramics / craft' },
@@ -127,41 +165,100 @@ const WORK = [
         tools: ['illustrator', 'photoshop'],
         desc: 'A ceramics studio where nothing leaves the kiln twice the same. The system leaves room for that: type stays fixed, everything around it stays loose, so an uneven rim reads as the point and not as a defect.' },
 
-      { name: 'Dingli',        slug: 'dingli',         shots: 6, frame: 'mosaic',    desc: '' },
-      { name: 'Material Band', slug: 'matterial-band', shots: 6, frame: 'spotlight', desc: '' },
-      { name: 'Asterox',       slug: 'asterox',        shots: 6, frame: 'identity',  desc: '' },
-      { name: 'PL shopet',     slug: 'pl-shopet',      shots: 6, frame: 'mosaic',    desc: '' }
+      { name: 'Dingli',        slug: 'dingli',         shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,    desc: '' },
+      { name: 'Material Band', slug: 'matterial-band', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' },
+      { name: 'Asterox',       slug: 'asterox',        shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,  desc: '' },
+      { name: 'PL shopet',     slug: 'pl-shopet',      shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,    desc: '' },
+      { name: 'Broker by Trade (BBT)', slug: 'broker-by-trade', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' }
     ]
   },
   {
     key: 'visual',
     title: 'Visual Design',
     blurb: 'Campaign and product visuals, from key art down to the last banner.',
-    // `bare` holds this whole shelf empty on purpose. The artwork is going
-    // to be ONE large composite image per project — the whole campaign laid
-    // out in a single tall piece — and until that exists there is nothing
-    // worth putting in its place, so picking a project here shows nothing
-    // at all: no name, no description, no placeholder. The list on the left
-    // still works, it just opens onto a clean panel.
+    // `layout: 'landing'` — each project is ONE tall composite image (the
+    // whole campaign laid out as a single landing-page-style piece), shown
+    // full width at its own proportions and scrolled, instead of the
+    // six-slot campaign rhythm. One file per project instead of a dozen is
+    // also what keeps this shelf light.
     //
-    // To wake a project up: drop `bare` from this category, give that
-    // project `shots: 1`, and put the file at
-    // assets/work/visual/<slug>/01.webp. Nothing else changes.
+    // `bare` holds every project that has no `shots` yet completely empty —
+    // no name, no description, no placeholder. A project wakes up on its own
+    // the moment it gets `shots: 1` and a file at
+    // assets/work/visual/<slug>/01.webp; the flag itself can stay.
+    layout: 'landing',
     bare: true,
     projects: [
-      { name: 'FSEL (Five-Star E-Learning)', slug: 'fsel'               },
-      { name: 'Koolkutela',                  slug: 'kkla'               },
-      { name: 'QCC Mastery Agency',          slug: 'qcc-mastery-agency' },
-      { name: 'Menso - Funwise',             slug: 'menso-funwise'      },
-      { name: 'First Support',               slug: 'first-support'      },
-      { name: 'Fre is 3+',                   slug: 'fre-is-3'           },
-      { name: 'Vnexpress',                   slug: 'vnexpress'          },
-      { name: 'Gốm và mình',                 slug: 'gom-va-minh'        },
-      { name: 'Cystack',                     slug: 'cystack'            },
-      { name: 'Koichi Studio',               slug: 'koichi'             },
-      { name: 'Parro.mood',                  slug: 'parro-mood'         },
-      { name: 'Koji Ezy',                    slug: 'koji-ezy'           },
-      { name: 'Lumi Sport',                  slug: 'lumi'               }
+      // DEMO: a low-res reference (272px wide, from ref gird/) standing in
+      // for the real landing image, so the layout can be judged now. Drop
+      // `ext` and replace with 01.webp at ~1600px wide when the real one exists.
+      { name: 'FSEL (Five-Star E-Learning)', slug: 'fsel', shots: 1, file: 'assets/work/visual/fsel/1.jpg',
+        // DEMO values (invented) — replace with the real dates and words.
+        time:  { from: '2024-03', to: '2024-06' },
+        meta:  [ { label: 'Role', value: 'Brand & visual designer' },
+                 { label: 'Type', value: 'Brand identity' } ],
+        tools: ['photoshop', 'illustrator'],
+        desc:  'A rice-cracker brand built around a cat mascot shaped like the cracker itself — playful enough for Gen Z, Japanese enough to feel authentic.' },
+      { name: 'Koolkutela', slug: 'kkla', shots: 1, file: 'assets/work/visual/kkla/1.jpg',
+        time:  { from: '2023-01', to: '2023-04' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Campaign visuals' } ],
+        tools: ['photoshop', 'illustrator'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'QCC Mastery Agency', slug: 'qcc-mastery-agency', shots: 1, file: DEMO_LANDING[2],
+        time:  { from: '2023-05', to: '2023-07' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Social campaign' } ],
+        tools: ['photoshop', 'figma'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Menso - Funwise', slug: 'menso-funwise', shots: 1, file: DEMO_LANDING[3],
+        time:  { from: '2023-08', to: '2023-11' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Key visual' } ],
+        tools: ['photoshop'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'First Support', slug: 'first-support', shots: 1, file: DEMO_LANDING[0],
+        time:  { from: '2024-01', to: '2024-02' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Social campaign' } ],
+        tools: ['figma', 'photoshop'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Fre is 3+', slug: 'fre-is-3', shots: 1, file: DEMO_LANDING[1],
+        time:  { from: '2024-02', to: '2024-05' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Product visuals' } ],
+        tools: ['photoshop', 'illustrator'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Vnexpress', slug: 'vnexpress', shots: 1, file: DEMO_LANDING[2],
+        time:  { from: '2024-04', to: '2024-04' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Editorial visuals' } ],
+        tools: ['photoshop'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Gốm và mình', slug: 'gom-va-minh', shots: 1, file: 'assets/work/visual/gom-va-minh/1.jpg',
+        time:  { from: '2024-06', to: '2024-08' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Brand visuals' } ],
+        tools: ['illustrator', 'photoshop'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Cystack', slug: 'cystack', shots: 1, file: 'assets/work/visual/cystack/1.jpg',
+        time:  { from: '2024-07', to: '2024-10' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Campaign visuals' } ],
+        tools: ['figma', 'illustrator'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Koichi Studio', slug: 'koichi', shots: 1, file: DEMO_LANDING[1],
+        time:  { from: '2024-09', to: '2024-11' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Key visual' } ],
+        tools: ['photoshop'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Parro.mood', slug: 'parro-mood', shots: 1, file: DEMO_LANDING[2],
+        time:  { from: '2025-01', to: '2025-03' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Social campaign' } ],
+        tools: ['photoshop', 'aftereffects'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Koji Ezy', slug: 'koji-ezy', shots: 1, file: DEMO_LANDING[3],
+        time:  { from: '2025-03', to: '2025-06' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Product visuals' } ],
+        tools: ['figma', 'photoshop'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
+      { name: 'Lumi Sport', slug: 'lumi', shots: 1, file: DEMO_LANDING[0],
+        time:  { from: '2025-06', to: '2025-09' },
+        meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Campaign visuals' } ],
+        tools: ['photoshop', 'illustrator'],
+        desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' }
     ]
   },
   {
@@ -214,6 +311,28 @@ const WORK = [
     shots: 24
   },
   {
+    key: 'ai',
+    title: 'AI flow',
+    blurb: 'Websites and tools I designed and built together with AI — Claude Code for the build, my eye for everything it gets wrong.',
+    // `swarm`: the right pane builds each project live — named cursors
+    // draw a wireframe of the page, then the real screenshot scans in.
+    // See js/swarm.js. Screenshot: assets/work/ai/<slug>/01.webp (raise
+    // `shots: 0` to `shots: 1` once it is there). Words sit in the list,
+    // as on Visual Design; `link` adds a "Visit" line under them.
+    // DRAFT copy: dates come from the repos' commit history.
+    layout: 'swarm',
+    infoInList: true,
+    projects: [
+      // Screenshots: full-page captures of the live sites (1440px wide).
+      { name: 'Kien Phan — personal brand site', slug: 'kien-phan', shots: 1, ext: 'jpg',
+        time: { from: '2026-07', to: '2026-10' }, link: 'https://www.kienphan.com.au/',
+        desc: 'The personal-brand site for Kien Phan, finance broker and founder of Fundwise Capital Australia. Designed and built end to end with Claude Code, from awards and reviews down to the strategy-session booking form, shipped through a staging → production flow.' },
+      { name: '8DIGIT — studio website', slug: '8digit-web', shots: 1, ext: 'jpg',
+        time: { from: '2026-07', to: '2026-07' }, link: 'https://www.8digit.com.au/',
+        desc: 'The website for 8DIGIT, a growth partner for professional services: strategy, brand, performance marketing and martech as one system. Design, motion and build done together with AI.' }
+    ]
+  },
+  {
     // Not a book — the camera opens this one, using the exact same shelf.
     // Flat, same as Freelancer above: one pile of shots, no project list.
     // `folder` overrides the default assets/work/<key>/ path, since these
@@ -250,6 +369,7 @@ const TOOL_ICONS = {
 
   let sheet, listEl, gridEl, nameEl, metaEl, toolsEl, descEl, titleEl, countEl, blurbEl, root;
   let lightbox, lbImg, lbCount;
+  let itemInfo;            // landing layout: the expanding block under the active project
   let current = null;      // the open category
   let project = 0;         // index into current.projects
   let lbIndex = 0;         // index into the open project's shots
@@ -295,6 +415,8 @@ const TOOL_ICONS = {
     // any more JS — branding uses it today. A data attribute rather than a
     // class so nothing has to be removed when switching categories.
     root.dataset.cat = key;
+    root.dataset.layout = cat.layout || '';
+    root.dataset.info = infoInList(cat) ? 'list' : '';
 
     titleEl.textContent = cat.title;
     blurbEl.textContent = cat.blurb || '';
@@ -315,6 +437,11 @@ const TOOL_ICONS = {
   };
 
   function isFlat(cat){ return !Array.isArray(cat.projects); }
+  // Where a project's words go: a landing shelf always moves them into the
+  // list under the project name, and any other shelf can ask for the same
+  // with `infoInList: true` (Branding does), leaving the right pane as
+  // nothing but the showcase.
+  function infoInList(cat){ return cat.layout === 'landing' || !!cat.infoInList; }
 
   // onWorkClose calls back into deselect(), which calls closeWork() again —
   // a flag breaks the loop without cutting the fade short.
@@ -324,6 +451,7 @@ const TOOL_ICONS = {
     if (!root || root.hidden || closing) return;
     closing = true;
     closeLightbox();
+    if (window.swarmStop) window.swarmStop();
     root.classList.remove('is-open');
     setTimeout(() => {
       if (!root.classList.contains('is-open')) root.hidden = true;
@@ -338,6 +466,7 @@ const TOOL_ICONS = {
 
   function buildList(){
     listEl.textContent = '';
+    itemInfo = null;
     current.projects.forEach((p, i) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -368,7 +497,13 @@ const TOOL_ICONS = {
   // scaffold of placeholders. Everything else — the project list, the
   // names, any `meta` or `desc` already written — stays in the data
   // untouched and comes straight back when the flag goes.
-  function isBare(){ return !!(current && current.bare); }
+  // Per project, not per shelf: a bare shelf only stays blank for the projects
+  // that have no `shots` yet, so artwork can land one project at a time.
+  function isBare(){
+    if (!current || !current.bare) return false;
+    const p = current.projects && current.projects[project];
+    return !(p && p.shots);
+  }
 
   // The project's facts — year, industry, the kind of deliverable — to the
   // left of its `desc`. An unfilled `meta` says so rather than leaving a
@@ -450,16 +585,87 @@ const TOOL_ICONS = {
     descEl.classList.toggle('is-placeholder', !written);
   }
 
+  /* ---- landing layout: info in the project list --------------
+     For a `layout: 'landing'` shelf the right pane is nothing but the
+     image, edge to edge, so the facts move into the list instead: ONE
+     block, moved to sit directly under whichever project is open. Moving
+     it (rather than keeping one per project) restarts its CSS entrance
+     every time, which is the whole motion — see .work__itemInfo in
+     css/work.css. Other layouts never call past the first line. */
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtMonth(ym){
+    const [y, m] = String(ym).split('-').map(Number);
+    return m ? `${MONTHS[m - 1]} ${y}` : String(y);
+  }
+
+  function setItemInfo(p, i){
+    if (!infoInList(current) || !p){
+      if (itemInfo) itemInfo.remove();
+      return;
+    }
+    if (!itemInfo){
+      itemInfo = document.createElement('div');
+      itemInfo.className = 'work__itemInfo';
+    }
+    itemInfo.textContent = '';
+    const inner = document.createElement('div');
+    inner.className = 'work__itemInfoIn';
+
+    if (p.time && p.time.from){
+      const to = p.time.to || p.time.from;
+      const t  = document.createElement('div');
+      t.className = 'work__time';
+      t.innerHTML = '<span class="work__timeDates"></span><span class="work__timeBar"><i></i></span>';
+      t.querySelector('.work__timeDates').textContent = to === p.time.from
+        ? fmtMonth(to)                                   // a one-month job is a date, not a range
+        : `${fmtMonth(p.time.from)} → ${fmtMonth(to)}`;
+      inner.appendChild(t);
+    }
+    // Only the dates and the words: role, type, tools and the month count
+    // were cut as clutter — the landing image already carries that detail.
+    if ((p.desc || '').trim()){
+      const d = document.createElement('p');
+      d.className = 'work__infoDesc';
+      d.textContent = p.desc.trim();
+      inner.appendChild(d);
+    }
+
+    if (p.link){
+      const a = document.createElement('a');
+      a.className = 'work__infoLink';
+      a.href = p.link;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = 'Visit ' + p.link.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') + ' ↗';
+      inner.appendChild(a);
+    }
+
+    // Nothing written yet (no dates, no desc): no empty box under the name.
+    if (!inner.children.length){
+      itemInfo.remove();
+      return;
+    }
+    itemInfo.appendChild(inner);
+    listEl.querySelectorAll('.work__item')[i].after(itemInfo);
+    itemInfo.classList.remove('is-in');
+    void itemInfo.offsetWidth;                // restart the entrance
+    itemInfo.classList.add('is-in');
+  }
+
   function showProject(i){
     project = i;
     const p = current.projects[i];
-    const bare = isBare();
+    const bare = isBare();   // reads `project`, so it must come after the line above
 
-    [...listEl.children].forEach((b, n) => b.classList.toggle('is-on', n === i));
-    nameEl.textContent = bare ? '' : p.name;
-    setMeta(bare ? null : p);
-    setTools(bare ? null : p);
-    setDesc(bare ? null : p);
+    // Only the project buttons — the landing layout slips its info block in
+    // between them, so plain listEl.children would be off by one.
+    [...listEl.querySelectorAll('.work__item')].forEach((b, n) => b.classList.toggle('is-on', n === i));
+    setItemInfo(bare ? null : p, i);
+    const side = bare || infoInList(current);   // landing / infoInList: facts sit in the list
+    nameEl.textContent = side ? '' : p.name;
+    setMeta(side ? null : p);
+    setTools(side ? null : p);
+    setDesc(side ? null : p);
     // Falls back to 'identity' for any project that doesn't name a frame —
     // every non-branding category, and any future branding project you
     // add without picking one on purpose.
@@ -496,10 +702,16 @@ const TOOL_ICONS = {
     // Every category's shots live under assets/work/<key>/ unless it names
     // its own `folder` — photography does, since those live under
     // assets/photos/ instead. See the note on `folder` in WORK above.
+    // `file` points a one-shot project straight at a given image (the
+    // Visual Design demo uses it); everything else follows the folder rule.
+    const proj = !isFlat(current) && current.projects[project];
+    if (proj && proj.file && n === 1) return proj.file;
     const base = current.folder || `assets/work/${current.key}`;
     return isFlat(current)
       ? `${base}/${String(n).padStart(2, '0')}.webp`
-      : `${base}/${current.projects[project].slug}/${String(n).padStart(2, '0')}.webp`;
+      // `ext` lets one project point at a non-WebP file (the Visual Design
+      // demo uses a .jpg) without changing the convention for everyone else.
+      : `${base}/${current.projects[project].slug}/${String(n).padStart(2, '0')}.${current.projects[project].ext || 'webp'}`;
   }
 
   // Branding's frames (identity/mosaic/spotlight) already unfold across
@@ -517,6 +729,14 @@ const TOOL_ICONS = {
     gridEl.textContent = '';
     const { label, count } = activeSet();
 
+    // AI flow builds its showcase live instead of laying out tiles — see
+    // js/swarm.js. The screenshot (if any) lands at the end of the build.
+    if (current.layout === 'swarm' && window.swarmBuild){
+      const p = current.projects[project];
+      window.swarmBuild(gridEl, p, p.shots ? shotPath(1) : null);
+      return;
+    }
+
     // Nothing to lay out. On a bare shelf that is the whole intent, so the
     // panel stays clean; anywhere else an empty grid under a project name
     // would read as something that failed to load, and says so instead.
@@ -530,7 +750,35 @@ const TOOL_ICONS = {
       return;
     }
 
-    const chunked = !isFlat(current) && current.key !== 'branding';
+    const chunked = !isFlat(current) && current.key !== 'branding' && current.layout !== 'landing';
+
+    // A board is drawn as one picture with tiles at fixed spots, so the grid
+    // turns into a plain box at the board's ratio and every tile is placed
+    // by percentage. Any other project gets the stylesheet's grid back.
+    const board = !isFlat(current) && current.projects[project].board;
+    gridEl.classList.toggle('work__grid--board', !!board);
+    gridEl.style.aspectRatio = board ? `${board.w} / ${board.h}` : '';
+    if (board){
+      board.tiles.forEach(([n, x, y, w, h]) => {
+        const t = tile(label, n);
+        t.style.left   = `${x / board.w * 100}%`;
+        t.style.top    = `${y / board.h * 100}%`;
+        t.style.width  = `${w / board.w * 100}%`;
+        t.style.height = `${h / board.h * 100}%`;
+        gridEl.appendChild(t);
+      });
+      return;
+    }
+
+    const bento = !isFlat(current) && current.projects[project].bento;
+    if (bento){
+      bento.forEach(([n, x, y, w, h]) => {
+        const t = tile(label, n);
+        t.style.gridArea = `${y} / ${x} / span ${h} / span ${w}`;
+        gridEl.appendChild(t);
+      });
+      return;
+    }
 
     let cycle = gridEl;
     for (let n = 1; n <= count; n++){
@@ -548,10 +796,16 @@ const TOOL_ICONS = {
     const fig = document.createElement('button');
     fig.type = 'button';
     fig.className = 'work__tile';
+    // Zoom in place: click magnifies the picture right where you clicked,
+    // moving the pointer pans across it, click again (or leave) zooms out.
     // An empty slot has nothing to enlarge, so it stays inert.
-    fig.addEventListener('click', () => {
-      if (!fig.classList.contains('is-empty')) openLightbox(n - 1);
+    fig.addEventListener('click', (e) => {
+      if (fig.classList.contains('is-empty')) return;
+      if (fig.classList.contains('is-zoomed')) { zoomOut(fig); return; }
+      zoomIn(fig, e);
     });
+    fig.addEventListener('mousemove', (e) => { if (fig.classList.contains('is-zoomed')) aimZoom(fig, e); });
+    fig.addEventListener('mouseleave', () => zoomOut(fig));
 
     const img = document.createElement('img');
     img.loading = 'lazy';
@@ -577,9 +831,88 @@ const TOOL_ICONS = {
     return fig;
   }
 
+  /* ---- zoom in place ------------------------------------------
+     A gentle magnify (ZOOM×) inside the picture's own tile, centred on the
+     pointer. Driven by one requestAnimationFrame loop per tile that eases
+     both the scale and the focus point towards their targets every frame,
+     so the picture glides after the pointer instead of jumping with each
+     mousemove, and zooming in/out is one continuous motion.
+     Cursor: zoom-in / zoom-out (css/work.css). */
+
+  const ZOOM = 1.6;        // how far a click magnifies
+  const EASE = 0.14;       // share of the remaining distance covered per frame (lower = softer)
+  const zs = new WeakMap(); // tile → { z, tz, fx, fy, tx, ty, raf }
+
+  function zoomState(fig){
+    let s = zs.get(fig);
+    if (!s){ s = { z: 1, tz: 1, fx: .5, fy: .5, tx: .5, ty: .5, raf: 0 }; zs.set(fig, s); }
+    return s;
+  }
+  function zoomIn(fig, e){
+    if (!fig.querySelector('img')) return;
+    const s = zoomState(fig);
+    aimZoom(fig, e);
+    if (s.z === 1){ s.fx = s.tx; s.fy = s.ty; }   // start from the clicked spot, no slide-in
+    s.tz = ZOOM;
+    fig.classList.add('is-zoomed');
+    runZoom(fig);
+  }
+  function aimZoom(fig, e){
+    const s = zoomState(fig);
+    const r = fig.getBoundingClientRect();
+    s.tx = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    s.ty = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    if (s.tz > 1) runZoom(fig);
+  }
+  function zoomOut(fig){
+    const s = zs.get(fig);
+    if (!s || s.tz === 1) return;
+    s.tz = 1;
+    fig.classList.remove('is-zoomed');
+    runZoom(fig);
+  }
+  function runZoom(fig){
+    const s = zoomState(fig);
+    if (s.raf) return;
+    const img = fig.querySelector('img');
+    const step = () => {
+      s.z  += (s.tz - s.z)  * EASE;
+      s.fx += (s.tx - s.fx) * EASE;
+      s.fy += (s.ty - s.fy) * EASE;
+      const done = Math.abs(s.tz - s.z) < 0.001 && Math.abs(s.tx - s.fx) < 0.0005 && Math.abs(s.ty - s.fy) < 0.0005;
+      if (done) s.z = s.tz;
+      if (s.z === 1 && s.tz === 1){
+        img.style.removeProperty('transform');
+        img.style.removeProperty('will-change');
+        s.raf = 0;
+        return;
+      }
+      // scale about the eased focus point: that point of the picture stays put
+      const w = img.offsetWidth, h = img.offsetHeight;
+      const dx = s.fx * w * (1 - s.z), dy = s.fy * h * (1 - s.z);
+      // will-change only while moving: a layer kept on would stay rasterised at
+      // 1× and look soft once magnified; dropping it lets the browser redraw
+      // the picture sharp at the zoomed size as soon as it settles.
+      if (done) img.style.removeProperty('will-change');
+      else img.style.setProperty('will-change', 'transform');
+      img.style.setProperty('transform', `translate(${dx}px, ${dy}px) scale(${s.z})`, 'important');
+      s.raf = done ? 0 : requestAnimationFrame(step);
+    };
+    s.raf = requestAnimationFrame(step);
+  }
+
+  function unzoom(){
+    if (!lightbox) return false;
+    const was = lightbox.classList.contains('is-zoomed');
+    lightbox.classList.remove('is-zoomed');
+    lightbox.scrollTop = lightbox.scrollLeft = 0;
+    return was;
+  }
+
   /* ---- lightbox ---------------------------------------------- */
 
   function openLightbox(n){
+    unzoom();
     const { label, count } = activeSet();
     lbIndex = n;
     lbImg.src = shotPath(n + 1);
@@ -612,7 +945,7 @@ const TOOL_ICONS = {
     if (!window.isWorkOpen()) return false;
 
     if (!lightbox.hidden){
-      if (e.key === 'Escape')     { closeLightbox();  return true; }
+      if (e.key === 'Escape')     { if (!unzoom()) closeLightbox(); return true; }
       if (e.key === 'ArrowRight') { stepShot(1);      return true; }
       if (e.key === 'ArrowLeft')  { stepShot(-1);     return true; }
       return true;

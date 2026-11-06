@@ -68,13 +68,6 @@
 
 /* ---- header ------------------------------------------------- */
 
-.flow__cat{
-  margin: 0 0 .4rem;
-  font: 700 11px/1 var(--mono);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
 
 .flow__title{
   margin: 0 0 .35rem;

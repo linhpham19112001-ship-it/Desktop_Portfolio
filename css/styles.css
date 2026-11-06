@@ -2,6 +2,15 @@
    What is inside my design domain? — interactive desk
    ============================================================ */
 
+/* Archia, self-hosted — it is not on any font CDN. Thin is left out: no
+   rule on the page asks for weight 100, and every file is ~64KB. Weights
+   map to the names the foundry ships them under (DemiBold = 600). */
+@font-face{ font-family: "Archia"; src: url("../assets/fonts/Archia-Light.ttf")    format("truetype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face{ font-family: "Archia"; src: url("../assets/fonts/Archia-Regular.ttf")  format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face{ font-family: "Archia"; src: url("../assets/fonts/Archia-Medium.ttf")   format("truetype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face{ font-family: "Archia"; src: url("../assets/fonts/Archia-DemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face{ font-family: "Archia"; src: url("../assets/fonts/Archia-Bold.ttf")     format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+
 :root{
   --ink:            #f4efe2;
   --ink-dim:        #a9a292;
@@ -11,8 +20,12 @@
   --panel-bg:       rgba(20, 22, 18, .82);
   --panel-line:     rgba(255, 233, 176, .18);
   --ease:           cubic-bezier(.22, 1, .36, 1);
-  --font:           ui-sans-serif, system-ui, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono:           ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --font:           "Archia", ui-sans-serif, system-ui, "Segoe UI", Arial, sans-serif;
+  /* The small uppercase labels (HUD, eyebrows, meta) run Archia too, so the
+     whole page speaks one typeface. Still named --mono because that is the
+     role — tracked-out caps for labelling — not a promise of fixed width.
+     The mini desktop inside the CRT keeps its own fonts (css/mini.css). */
+  --mono:           "Archia", ui-sans-serif, system-ui, "Segoe UI", Arial, sans-serif;
   --tip-lift:       0px;  /* extra clearance above chunky custom cursors — app.js cycleCursor */
 }
 
@@ -354,40 +367,103 @@ body{
 }
 
 /* ------------------------------------------------------------
-   Labels toggle — bottom-left corner
+   Labels toggle — top-left, right under the site name
    ------------------------------------------------------------ */
 
-.labels{
+/* Under the brand rather than in a bottom corner: top-left is where the
+   eye lands first on this page, and down in the corner it read as chrome
+   nobody was meant to touch. `left` matches the HUD's own padding so the
+   pill's edge lines up with the name above it. */
+.homebar{
   position: fixed;
   z-index: 960;
   left: clamp(.9rem, 2.2vw, 1.8rem);
-  bottom: clamp(.8rem, 2.2vw, 1.6rem);
-  display: flex;
-  align-items: center;
-  gap: .55em;
-  padding: .55em 1em;
-  border-radius: 999px;
-  font: 700 clamp(10px, .95vw, 12px)/1 var(--mono);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: rgba(10, 12, 8, .55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 233, 176, .16);
-  cursor: pointer;
+  top: clamp(.9rem, 2.2vw, 1.8rem);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .6s var(--ease), background .2s, color .2s,
-              border-color .2s, transform .2s var(--ease);
+  transition: opacity .6s var(--ease);
 }
-.is-ready .labels{ opacity: 1; pointer-events: auto; }
-.labels:hover{ background: rgba(20, 24, 16, .82); transform: translateY(-1px); }
+.is-ready .homebar{ opacity: 1; pointer-events: auto; }
+/* Zoomed in there is one object on screen; the bar steps aside. */
+.is-zoomed .homebar{ opacity: 0; pointer-events: none; }
 
-.labels kbd{
-  font-size: .82em;
-  letter-spacing: 0;
-  padding: .25em .45em;
+.homebar__btn,
+.homebar__menu{
+  background: rgba(10, 12, 8, .6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 233, 176, .16);
+  color: var(--ink);
+}
+
+.homebar__btn{
+  display: flex;
+  align-items: center;
+  gap: .65em;
+  padding: .6em .9em .6em 1em;
+  border-radius: 999px;
+  font: 700 clamp(11px, 1vw, 13px)/1 var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.homebar__btn:hover,
+.homebar.is-open .homebar__btn{ background: rgba(20, 24, 16, .85); border-color: rgba(255, 233, 176, .3); }
+
+.homebar__chev{
+  width: 1em; height: 1em;
+  fill: none; stroke: currentColor; stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: .7;
+  transition: transform .22s var(--ease);
+}
+.homebar.is-open .homebar__chev{ transform: rotate(180deg); }
+
+.homebar__menu{
+  position: absolute;
+  top: calc(100% + .5rem);
+  left: 0;
+  min-width: 15rem;
+  padding: .45rem;
+  border-radius: 1rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+  transform-origin: top left;
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
+}
+.homebar.is-open .homebar__menu{ opacity: 1; transform: none; }
+
+.labels,
+.homebar__item{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: .6em;
+  padding: .7em .75em;
+  border: 0;
+  border-radius: .6rem;
+  background: none;
+  color: var(--ink);
+  font: 500 14px/1.2 var(--font);
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s;
+}
+.labels:hover,
+.homebar__item:hover{ background: rgba(255, 233, 176, .08); }
+.labels__text{ flex: 1; }
+.labels kbd{ font-size: .78em; padding: .2em .45em; }
+
+.homebar__head{
+  margin: .35rem .75rem .25rem;
+  padding-top: .55rem;
+  border-top: 1px solid rgba(255, 233, 176, .12);
+  font: 700 10px/1 var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
 }
 
 /* The switch. Everything is in `em` so it scales with the button's own
@@ -435,14 +511,12 @@ body{
 }
 .labels[aria-checked="true"]{ border-color: rgba(255, 233, 176, .34); }
 
-.labels:focus-visible{
+.labels:focus-visible,
+.homebar__btn:focus-visible,
+.homebar__item:focus-visible{
   outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
-
-/* Zoomed in there is one object on screen and its label is hidden, so the
-   button has nothing to say. */
-.is-zoomed .labels{ opacity: 0; pointer-events: none; }
 
 /* ------------------------------------------------------------
    Cursor tooltip
@@ -525,7 +599,7 @@ body{
   text-shadow: 0 2px 14px rgba(0,0,0,.7);
 }
 
-.hud__score{ text-align: right; display: grid; gap: .5em; justify-items: end; }
+.hud__score{ margin-left: auto; text-align: right; display: grid; gap: .5em; justify-items: end; }
 .hud__scoreLabel{ color: var(--ink-dim); }
 
 .hud__scoreNum{
@@ -656,13 +730,6 @@ kbd{
 }
 .panel__close:hover{ color: var(--ink); background: rgba(255,233,176,.1); }
 
-.panel__cat{
-  margin: 0 0 .5rem;
-  font: 700 11px/1 var(--mono);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
 
 .panel__title{
   margin: 0 0 .7rem;
@@ -792,13 +859,6 @@ kbd{
 }
 .mailer__close:hover{ color: var(--ink); background: rgba(255,233,176,.1); }
 
-.mailer__cat{
-  margin: 0 0 .5rem;
-  font: 700 11px/1 var(--mono);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
 
 .mailer__title{
   margin: 0 0 .6rem;
@@ -962,13 +1022,6 @@ kbd{
 
 .hub__head{ margin-bottom: 1.1rem; }
 
-.hub__cat{
-  margin: 0 0 .5rem;
-  font: 700 11px/1 var(--mono);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
 
 .hub__name{
   margin: 0 0 .25rem;
@@ -1187,10 +1240,7 @@ kbd{
   }
   .panel.is-open{ transform: none; }
 
-  /* The hint is nearly full width down here, so it moves up a row rather
-     than sitting on top of the Labels button in the same corner. */
-  .hint{ font-size: 11px; bottom: 3.6rem; }
-  .labels{ padding: .5em .8em; }
+  .hint{ font-size: 11px; }
   .labels kbd{ display: none; }   /* no keyboard to press it with */
 
   /* The card drops the copy/open buttons to a second line rather than
@@ -1207,4 +1257,143 @@ kbd{
 
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+/* ------------------------------------------------------------
+   Robot face — on the little Mac's screen. Built and driven by
+   js/robot.js; every expression is one `.robot--<mood>` rule.
+   Sized in container units so it scales with the desk.
+   ------------------------------------------------------------ */
+
+.robot{
+  --eye: #5dffa0;
+  --glow: rgba(93, 255, 160, .55);
+  --lx: 0; --ly: 0;
+  position: absolute;
+  z-index: 103;                       /* just above the Mac (z 102) */
+  pointer-events: none;
+  container-type: size;
+  border-radius: 14% / 18%;
+  overflow: hidden;
+  /* faint phosphor glow + scanlines on the black glass */
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 45%, rgba(93,255,160,.10), transparent 70%);
+  transition: filter .22s var(--ease);
+}
+.robot.is-hot{ filter: brightness(1.15); }
+.robot.is-picked{ z-index: calc(600 + 103); }
+
+.robot__eyes{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16cqw;
+  transform: translate(calc(var(--lx) * 11cqw), calc(var(--ly) * 12cqh));
+  /* Glow on the group, not each eye: a box-shadow would be cut square by
+     the eyes' clip-path, a drop-shadow follows whatever shape is left. */
+  filter: drop-shadow(0 0 1.5cqw var(--glow)) drop-shadow(0 0 5cqw var(--glow));
+  transition: transform .35s var(--ease);
+}
+
+.robot__eye{
+  width: 17cqw;
+  height: 36cqh;
+  border-radius: 34%;
+  background: var(--eye);
+  border-top: 0 solid var(--eye);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  transition: transform .12s var(--ease), width .25s var(--ease), height .25s var(--ease),
+              border-radius .25s var(--ease), clip-path .25s var(--ease),
+              background .25s;
+}
+
+/* blink: squash, from the middle */
+.robot.is-blink .robot__eye{ transform: scaleY(.08); }
+
+/* happy  ^ ^  — the eye becomes an arc */
+.robot--happy .robot__eye{
+  height: 22cqh;
+  background: transparent;
+  border-top-width: 6cqh;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  transform: translateY(6cqh);
+}
+
+/* surprised — big round eyes */
+.robot--surprised .robot__eye{ width: 23cqw; height: 46cqh; border-radius: 50%; }
+
+/* sleepy — heavy lids, a drifting z */
+.robot--sleepy .robot__eye{ transform: translateY(7cqh) scaleY(.28); }
+.robot__z{
+  position: absolute;
+  right: 12cqw; top: 8cqh;
+  font: 700 18cqh/1 var(--mono);
+  color: var(--eye);
+  text-shadow: 0 0 2cqw var(--glow);
+  opacity: 0;
+}
+.robot--sleepy .robot__z{ animation: robotZ 1.6s var(--ease) infinite; }
+@keyframes robotZ{
+  0%  { opacity: 0; transform: translate(0, 4cqh) scale(.6); }
+  40% { opacity: 1; }
+  100%{ opacity: 0; transform: translate(6cqw, -6cqh) scale(1); }
+}
+
+/* angry — brows slanted down to the middle, red */
+.robot--angry{ --eye: #ff5b5b; --glow: rgba(255, 91, 91, .55); }
+.robot--angry .robot__eye--l{ clip-path: polygon(0 0, 100% 42%, 100% 100%, 0 100%); }
+.robot--angry .robot__eye--r{ clip-path: polygon(0 42%, 100% 0, 100% 100%, 0 100%); }
+
+/* sad — brows slanted up to the middle, eyes droop */
+.robot--sad{ --eye: #6fc8ff; --glow: rgba(111, 200, 255, .5); }
+.robot--sad .robot__eye{ transform: translateY(6cqh); }
+.robot--sad .robot__eye--l{ clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%); }
+.robot--sad .robot__eye--r{ clip-path: polygon(0 0, 100% 40%, 100% 100%, 0 100%); }
+
+/* wink — one eye shut */
+.robot--wink .robot__eye--r{ transform: scaleY(.1); }
+
+/* suspicious — narrowed, glancing sideways */
+.robot--suspicious .robot__eye{ transform: translateX(-5cqw) scaleY(.42); }
+
+/* love — heart eyes, pink */
+.robot--love{ --eye: #ff7ab6; --glow: rgba(255, 122, 182, .55); }
+.robot--love .robot__eye{
+  width: 22cqw; height: 34cqh;
+  border-radius: 0;
+  clip-path: polygon(50% 100%, 8% 58%, 0 34%, 6% 12%, 24% 2%, 42% 8%, 50% 20%,
+                     58% 8%, 76% 2%, 94% 12%, 100% 34%, 92% 58%);
+  animation: robotBeat .7s var(--ease) infinite;
+}
+@keyframes robotBeat{ 0%,100%{ transform: scale(1); } 40%{ transform: scale(1.14); } }
+
+/* text — the eyes step aside for the section name, with a typing cursor */
+.robot__text{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 24cqh/1 var(--mono);
+  letter-spacing: .02em;
+  white-space: nowrap;
+  color: var(--eye);
+  text-shadow: 0 0 1.5cqw var(--glow), 0 0 5cqw var(--glow);
+  opacity: 0;
+  transform: scale(.85);
+  transition: opacity .2s var(--ease), transform .25s var(--ease);
+}
+.robot__text b{ font-weight: inherit; animation: robotCaret .8s steps(1) infinite; }
+@keyframes robotCaret{ 50%{ opacity: 0; } }
+.robot--text .robot__text{ opacity: 1; transform: none; }
+.robot--text .robot__eyes{ opacity: 0; transform: scale(.6); }
+.robot__eyes{ transition: transform .35s var(--ease), opacity .2s var(--ease); }
+
+/* Lamp off: the face lives outside .scene (see robot.js), so it keeps
+   its full brightness while the desk dims — and glows a touch harder. */
+.is-lights-off .robot__eyes{
+  filter: drop-shadow(0 0 2cqw var(--glow)) drop-shadow(0 0 8cqw var(--glow));
 }

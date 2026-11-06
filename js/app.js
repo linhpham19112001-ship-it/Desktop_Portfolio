@@ -179,6 +179,23 @@ const ITEMS = [
     file: 'assets/scene/mouse.webp', x: 2770, y: 2006, w: 377, h: 207,
     action: 'cursor',
     title: 'Mouse'
+  },
+  // Added after hitmap.js was first generated, so they sit at the END of the
+  // list (appending keeps every earlier index valid). The shadow goes first
+  // so it paints under the little Mac; `decor` keeps it out of the hit map,
+  // the discovery count and the labels — it is part of the picture only.
+  {
+    file: 'assets/AI/Shadow.png', x: 843, y: 2100, w: 388, h: 182,
+    z: 101,
+    decor: true
+  },
+  {
+    // The little Mac in front of the tower: websites and tools built with
+    // AI. Opens the shelf on the 'ai' category in js/work.js.
+    file: 'assets/AI/AI.png', x: 893, y: 1841, w: 309, h: 348,
+    z: 102,
+    work:  'ai',
+    title: 'AI flow'
   }
 ];
 
@@ -203,7 +220,7 @@ const BG_FILE = 'assets/scene/desktop_0012_Backgroud.webp';
    `action` fire a one-shot instead of opening the panel — neither appear
    in the counter, the keyboard-arrow order, or the panel. */
 const SELECTABLE = ITEMS.map((_, i) => i)
-  .filter(i => ITEMS[i].group === undefined && !ITEMS[i].action);
+  .filter(i => ITEMS[i].group === undefined && !ITEMS[i].action && !ITEMS[i].decor);
 const PIP_OF = {};
 SELECTABLE.forEach((itemIndex, pip) => { PIP_OF[itemIndex] = pip; });
 
@@ -330,7 +347,9 @@ function buildLayers(){
     el.style.top    = pct(box.y, CANVAS_H);
     el.style.width  = pct(box.w, CANVAS_W);
     el.style.height = pct(box.h, CANVAS_H);
-    el.style.setProperty('--z', String(100 - i));   // list order == paint order
+    // List order == paint order, unless an item names its own `z` — the
+    // appended items below need to sit IN FRONT of earlier ones.
+    el.style.setProperty('--z', String(item.z ?? 100 - i));
 
     if (item.screen){
       // A live surface clipped to the PNG's silhouette.
@@ -538,6 +557,47 @@ function buildTags(){
 function bindLabels(){
   const btn = $('#labels');
   btn.addEventListener('click', toggleLabels);
+  bindHomebar();
+}
+
+/* ---- home bar -----------------------------------------------
+   The pill top-left. Opens a small menu holding the labels switch and
+   one row per section; picking a row closes the menu and selects that
+   object exactly as clicking it on the desk would. The labels switch
+   leaves the menu open so its effect can be seen behind it. */
+function bindHomebar(){
+  const bar  = $('#homebar');
+  const btn  = $('#homebarBtn');
+  const menu = $('#homebarMenu');
+  const list = $('#homebarList');
+
+  SELECTABLE.forEach((i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'homebar__item';
+    b.textContent = ITEMS[i].title;
+    b.addEventListener('click', () => { close(); select(i); });
+    list.appendChild(b);
+  });
+
+  function open(){
+    menu.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    void menu.offsetWidth;            // commit the hidden state so the fade runs
+    bar.classList.add('is-open');
+  }
+  function close(){
+    if (menu.hidden) return;
+    bar.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+    setTimeout(() => { if (!bar.classList.contains('is-open')) menu.hidden = true; }, 220);
+  }
+
+  btn.addEventListener('click', () => (menu.hidden ? open() : close()));
+  document.addEventListener('pointerdown', (e) => { if (!bar.contains(e.target)) close(); });
+  bar.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){ e.stopPropagation(); close(); btn.focus(); }
+  });
 }
 
 function toggleLabels(){
@@ -818,7 +878,6 @@ function step(dir){
 /* ---- panel -------------------------------------------------- */
 
 function fillPanel(item){
-  $('#panelCat').textContent   = item.cat;
   $('#panelTitle').textContent = item.title;
   $('#panelDesc').textContent  = item.desc;
 

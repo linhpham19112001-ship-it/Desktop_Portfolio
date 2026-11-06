@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Nhat Linh Portfolio</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <meta name="description" content="An interactive desk. Hover to reveal, click to explore.">
 <!-- mini.css first: it is the component layer (the .win chrome, the --w-*
      palette). styles.css is the page layer and must be able to override it
@@ -11,6 +12,7 @@
 <link rel="stylesheet" href="css/mini.css">
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/work.css">
+<link rel="stylesheet" href="css/swarm.css">
 <link rel="stylesheet" href="css/flow.css">
 </head>
 <body>
@@ -59,10 +61,6 @@
 </div>
 
 <header class="hud">
-  <div class="hud__brand">
-    <span class="hud__dot"></span>
-    <span class="hud__title">NHAT&nbsp;LINH&nbsp;PORTFOLIO</span>
-  </div>
   <div class="hud__score">
     <span class="hud__scoreLabel">DISCOVERED</span>
     <span class="hud__scoreNum"><b id="found">0</b>&thinsp;/&thinsp;<i id="total">0</i></span>
@@ -74,19 +72,30 @@
 
 <p class="hint" id="hint"><kbd>Hover</kbd> to reveal &middot; <kbd>Click</kbd> to open &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> to browse &middot; <kbd>Esc</kbd> to close</p>
 
-<!-- Names every section at once, for anyone who would rather read the desk
-     than poke at it. Off by default — finding things is the point. -->
-<!-- role="switch" + aria-checked, not a plain pressed button: it reads as a
-     two-state switch to a screen reader, which is what it now looks like. -->
-<button class="labels" id="labels" type="button" role="switch" aria-checked="false">
-  <span class="labels__track" aria-hidden="true"><i class="labels__knob"></i></span>
-  <span class="labels__text">Labels</span>
-  <kbd>L</kbd>
-</button>
+<!-- Home bar: the site name as a small pill that drops a menu — the
+     labels layer (off by default; finding things is the point) and a quick
+     jump to every section, for anyone who would rather not hunt. -->
+<div class="homebar" id="homebar">
+  <button class="homebar__btn" id="homebarBtn" type="button"
+          aria-haspopup="true" aria-expanded="false" aria-controls="homebarMenu">
+    <span class="hud__dot" aria-hidden="true"></span>
+    <span class="homebar__name">Nhat Linh</span>
+    <svg class="homebar__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg>
+  </button>
+  <div class="homebar__menu" id="homebarMenu" hidden>
+    <!-- role="switch" + aria-checked: reads as the two-state switch it looks like. -->
+    <button class="labels" id="labels" type="button" role="switch" aria-checked="false">
+      <span class="labels__text">Show labels</span>
+      <kbd>L</kbd>
+      <span class="labels__track" aria-hidden="true"><i class="labels__knob"></i></span>
+    </button>
+    <p class="homebar__head">Go to</p>
+    <nav class="homebar__list" id="homebarList" aria-label="Sections"></nav>
+  </div>
+</div>
 
 <aside class="panel" id="panel" role="dialog" aria-modal="false" aria-labelledby="panelTitle" hidden>
   <button class="panel__close" id="panelClose" aria-label="Close">&times;</button>
-  <p class="panel__cat" id="panelCat"></p>
   <h2 class="panel__title" id="panelTitle"></h2>
   <p class="panel__desc" id="panelDesc"></p>
   <ul class="panel__tags" id="panelTags"></ul>
@@ -137,7 +146,6 @@
 
   <div class="work__sheet">
     <header class="work__head">
-      <p class="work__cat">From the shelf</p>
       <h2 class="work__title" id="workTitle"></h2>
       <p class="work__blurb" id="workBlurb"></p>
       <p class="work__count" id="workCount"></p>
@@ -190,7 +198,6 @@
     <button class="hub__close" type="button" data-hub-close aria-label="Close">&times;</button>
 
     <header class="hub__head">
-      <p class="hub__cat">Contact</p>
       <h2 class="hub__name" id="hubName"></h2>
       <p class="hub__role" id="hubRole"></p>
       <p class="hub__status" id="hubStatus"></p>
@@ -214,7 +221,6 @@
 
   <div class="flow__stage">
     <header class="flow__head">
-      <p class="flow__cat">Under the hood</p>
       <h2 class="flow__title" id="flowTitle">Workflow<span class="flow__hint">
         — power in one end, something finished out the other. Point at a part.</span></h2>
     </header>
@@ -230,8 +236,6 @@
   <div class="mailer__backdrop" data-close></div>
   <form class="mailer__win" id="mailerForm" autocomplete="on">
     <button class="mailer__close" type="button" data-close aria-label="Close">&times;</button>
-
-    <p class="mailer__cat">Say hello</p>
     <h2 class="mailer__title" id="mailerTitle">Contact for a job</h2>
     <p class="mailer__desc">This opens your own mail app — nothing is stored here.</p>
 
@@ -262,10 +266,12 @@
 <script src="js/hitmap.js"></script>
 <script src="js/mini.js"></script>
 <script src="js/work.js"></script>
+<script src="js/swarm.js"></script>
 <script src="js/flow.js"></script>
 <!-- contacts.js before app.js: it publishes CONTACT_EMAIL, which the sticky
      note's mailto form reads so there is only one address to keep current. -->
 <script src="js/contacts.js"></script>
 <script src="js/app.js"></script>
+<script src="js/robot.js"></script>
 </body>
 </html>

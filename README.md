@@ -15,6 +15,8 @@ too.
 
 ## Deploy
 
+> **Trước khi deploy:** làm hết các việc trong `TODO-truoc-khi-deploy.md` (cắt ảnh Visual Design dài thành lát, đổi WebP, hai cỡ theo màn hình), nếu không trang sẽ nặng và giật trên điện thoại.
+
 Upload the **contents of this folder** to any static host. There is
 nothing to build or install.
 

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -40 1080 1080">
+  <!-- The site icon: the little cream computer. Adapts to the browser's tab
+       bar via the embedded media query — on a LIGHT tab bar a cream body
+       would vanish into the white, so it gets a dark outline and a slightly
+       deeper cream; on a DARK tab bar it is the original artwork untouched.
+       Source artwork: _source (not deployed)/icon web.svg -->
+  <style>
+    .body   { fill: #f3e8cf; stroke: #1f1d18; stroke-width: 26; stroke-linejoin: round; }
+    .screen { fill: #111; }
+    .shade1 { opacity: .05; }
+    .shade2 { opacity: .07; }
+    .led    { fill: #6cbe45; opacity: .45; }
+    .btn    { fill: #f58c8e; }
+    .btnDot { fill: #ed7279; }
+    @media (prefers-color-scheme: dark) {
+      .body   { fill: #fffaf0; stroke: none; }
+      .screen { fill: #000; }
+      .shade1 { opacity: .03; }
+      .shade2 { opacity: .05; }
+      .led    { opacity: .2; }
+    }
+  </style>
+  <rect class="body" x="75.27" y="646.43" width="849.47" height="353.57" rx="42.38" ry="42.38"/>
+  <rect class="shade1" x="75.27" y="785.55" width="849.47" height="75.65"/>
+  <path class="body" d="M924.73,819.76H75.27c-42.92,0-76.6-30.14-75.22-67.14L25.7,59.84C26.93,26.72,60.61,0,100.93,0h798.13c40.33,0,74.01,26.72,75.23,59.84l25.66,692.78c1.37,37-32.31,67.14-75.22,67.14Z"/>
+  <rect class="shade2" x="408.86" y="669.32" width="490.38" height="44.26" rx="19.29" ry="19.29"/>
+  <rect class="led" x="341" y="669.32" width="44.26" height="44.26" rx="22.13" ry="22.13"/>
+  <rect class="screen" x="80.8" y="51.3" width="838.39" height="521.67" rx="51.14" ry="51.14"/>
+  <rect class="btn" x="133.85" y="649.44" width="84.01" height="84.01" rx="14.85" ry="14.85"/>
+  <circle class="btnDot" cx="175.85" cy="691.45" r="25.52"/>
+</svg>

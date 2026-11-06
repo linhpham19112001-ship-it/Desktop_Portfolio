@@ -29,8 +29,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: min(1400px, calc(100vw - 2.5rem));
-  height: min(720px, calc(100vh - 2.5rem));
+  /* Near full-screen: the work is the point of this sheet, and a tall
+     landing image needs all the height the window has to read as one. */
+  width: min(1680px, calc(100vw - 2.5rem));
+  height: calc(100vh - 2.5rem);
   border-radius: 1.25rem;
   background: var(--panel-bg);
   backdrop-filter: blur(20px) saturate(1.2);
@@ -53,13 +55,6 @@
   border-bottom: 1px solid var(--panel-line);
 }
 
-.work__cat{
-  margin: 0 0 .45rem;
-  font: 700 11px/1 var(--mono);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
 
 .work__title{
   margin: 0 0 .35rem;
@@ -512,6 +507,40 @@
   aspect-ratio: 21 / 9;
 }
 
+/* ---- frame: bento ------------------------------------------------
+   Hand-placed rather than a repeating rhythm: the project's own
+   `bento` table in js/work.js gives each tile its grid area. Four
+   columns, rows exactly one column tall, and a gap at the artwork's
+   own ratio (96px between 1872px cells), so tiles drawn to 1x1 / 1x2
+   / 2x1 / 2x2 cells land uncropped. Rounder corners than the other
+   frames: the cards are the look. */
+/* cqw inside the grid's own rules would measure the grid's ancestor,
+   so the container is the detail pane it sits in. */
+.work[data-cat="branding"][data-frame="bento"] .work__detail{
+  container-type: inline-size;
+}
+.work[data-cat="branding"][data-frame="bento"] .work__grid{
+  --gap: calc(100cqw * 96 / 7776);
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: calc((100cqw - 3 * var(--gap)) / 4);
+  gap: var(--gap);
+}
+.work[data-cat="branding"][data-frame="bento"] .work__tile{
+  aspect-ratio: auto;
+  border-radius: 1.4rem;
+}
+/* A `board` project (js/work.js) is one fixed picture: the grid becomes a
+   box at the board's ratio (set inline) and each tile sits at its own
+   percentage spot, so the artwork's gutters and ratios carry over exactly. */
+.work[data-cat="branding"][data-frame="bento"] .work__grid.work__grid--board{
+  display: block;
+  position: relative;
+}
+.work[data-cat="branding"][data-frame="bento"] .work__grid--board .work__tile{
+  position: absolute;
+  min-height: 0;
+}
+
 /* ---- frame: spotlight --------------------------------------------
    The leanest of the three — fewer, bigger beats, for a project that
    reads best as a small number of hero moments rather than a set of
@@ -544,6 +573,134 @@
 .work[data-cat="branding"][data-frame="spotlight"] .work__grid .work__tile:nth-child(4n + 0){
   grid-column: span 12;
   aspect-ratio: 21 / 9;
+}
+
+/* ---- landing layout (Visual Design) --------------------------
+   The right pane is the image and nothing else: edge to edge, no
+   padding, no rounded frame, at its own proportions, scrolled like a
+   landing page. Every word about the project moves into the list on
+   the left (.work__itemInfo below), which stands still while the
+   image scrolls — so the description is readable the whole way down.
+   ------------------------------------------------------------ */
+.work[data-layout="landing"] .work__body{
+  grid-template-columns: minmax(240px, 300px) 1fr;
+}
+.work[data-layout="landing"] .work__detail{ padding: 0; }
+.work[data-layout="landing"] .work__detailHead{ display: none; }
+/* Any shelf with its words in the list (Branding too, via `infoInList`)
+   drops the heading block above the showcase the same way. */
+.work[data-info="list"] .work__body{
+  grid-template-columns: minmax(240px, 300px) 1fr;
+}
+.work[data-info="list"] .work__detailHead{ display: none; }
+.work[data-layout="landing"] .work__grid{ display: block; }
+.work[data-layout="landing"] .work__tile{
+  display: block;
+  width: 100%;
+  aspect-ratio: auto;
+  min-height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  cursor: zoom-in;
+}
+.work[data-layout="landing"] .work__tile img{
+  height: auto;
+  animation: landIn .7s var(--ease) both;     /* replays on every project switch: the img is new */
+}
+.work[data-layout="landing"] .work__tile:hover{ transform: none; }
+@keyframes landIn{
+  from{ opacity: 0; transform: translateY(18px) scale(1.01); }
+  to  { opacity: 1; transform: none; }
+}
+
+/* The project's facts, opened up under its own name in the list.
+   Height animates via grid rows 0fr → 1fr (the one way to transition
+   to "auto" height); the rows inside then arrive in a short stagger,
+   and the timeline bar draws itself left to right last. */
+.work__itemInfo{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .45s var(--ease);
+}
+.work__itemInfo.is-in{ grid-template-rows: 1fr; }
+.work__itemInfoIn{
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  gap: .7rem;
+  /* Same glass-and-hairline language as the sheet itself and the hover
+     state of a list item: a faint cream wash, a 1px --panel-line edge,
+     the list's own corner radius. Amber stays reserved for the selected
+     project's pill above, so it still only ever means "this one". */
+  padding: .85rem .8rem .9rem;
+  margin: .3rem 0 .6rem;
+  border: 1px solid var(--panel-line);
+  border-radius: .55rem;
+  background: rgba(255,233,176,.04);
+}
+/* The border would still show as a 2px sliver while the row is
+   collapsed to 0fr, so it only appears once the block is opening. */
+.work__itemInfo:not(.is-in) .work__itemInfoIn{ border-color: transparent; padding-block: 0; }
+.work__itemInfoIn > *{
+  opacity: 0;
+  transform: translateY(6px);
+}
+.work__itemInfo.is-in .work__itemInfoIn > *{
+  animation: infoIn .45s var(--ease) both;
+}
+.work__itemInfo.is-in .work__itemInfoIn > :nth-child(1){ animation-delay: .12s; }
+.work__itemInfo.is-in .work__itemInfoIn > :nth-child(2){ animation-delay: .18s; }
+.work__itemInfo.is-in .work__itemInfoIn > :nth-child(3){ animation-delay: .24s; }
+.work__itemInfo.is-in .work__itemInfoIn > :nth-child(4){ animation-delay: .30s; }
+.work__itemInfo.is-in .work__itemInfoIn > :nth-child(n+5){ animation-delay: .36s; }
+@keyframes infoIn{ to{ opacity: 1; transform: none; } }
+
+.work__time{ display: grid; gap: .45rem; }
+.work__timeDates{ font: 600 .82rem/1.2 var(--font); color: var(--ink); }
+.work__timeBar{
+  position: relative;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--panel-line);
+}
+/* Cream, not amber, and no glow: a timeline is information, not state. */
+.work__timeBar i{
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: var(--ink-dim);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.work__itemInfo.is-in .work__timeBar i{
+  animation: barIn .9s var(--ease) .35s both;
+}
+@keyframes barIn{ to{ transform: scaleX(1); } }
+/* end caps, so it reads as a span between two dates, not a progress bar */
+.work__timeBar::before,
+.work__timeBar::after{
+  content: '';
+  position: absolute; top: 50%;
+  width: 6px; height: 6px; margin-top: -3px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.work__timeBar::before{ left: -2px; }
+.work__timeBar::after { right: -2px; opacity: 0; }
+.work__itemInfo.is-in .work__timeBar::after{ animation: infoIn .2s linear 1.15s both; }
+
+
+
+.work__infoDesc{
+  margin: 0;
+  font-size: .82rem;
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .work__itemInfo, .work__itemInfoIn > *, .work__timeBar i,
+  .work[data-layout="landing"] .work__tile img{ animation: none !important; transition: none !important; opacity: 1; transform: none; }
 }
 
 /* The flat book's own layout: a loose scrapbook wall instead of the even
@@ -775,7 +932,49 @@
     aspect-ratio: 3 / 4;
     min-height: 0;
   }
+  /* Phone: bento keeps its four columns — the cells just get smaller —
+     so only the corners, which would swallow a 5rem tile, shrink. */
+  .work[data-cat="branding"][data-frame="bento"] .work__grid .work__tile:nth-child(n):nth-child(n){
+    aspect-ratio: auto;
+    border-radius: .7rem;
+  }
 
   .work__lbNav{ width: 2.4rem; height: 2.4rem; }
   .work__lightbox img{ max-width: calc(100vw - 6rem); }
 }
+
+/* ---- zoom in place -------------------------------------------
+   The pointer turns into a magnifier over any picture on the shelf; a click
+   zooms the picture inside its own tile around the pointer (js/work.js
+   zoomIn / aimZoom). The rules carry !important and extra weight because
+   the desk's custom cursors (html.has-custom-cursor *) override every
+   cursor on the page with !important. */
+
+html .work .work__tile:not(.is-empty),
+html.has-custom-cursor .work .work__tile:not(.is-empty),
+html.has-custom-cursor .work .work__tile:not(.is-empty) *{
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='13' cy='13' r='10' fill='%23FFE9B0' stroke='%231a1a14' stroke-width='2.5'/%3E%3Cpath d='M20.5 20.5 29 29' stroke='%231a1a14' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M8.5 13h9M13 8.5v9' stroke='%231a1a14' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 13 13, zoom-in !important;
+}
+html .work .work__tile.is-zoomed,
+html.has-custom-cursor .work .work__tile.is-zoomed,
+html.has-custom-cursor .work .work__tile.is-zoomed *{
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='13' cy='13' r='10' fill='%23FFE9B0' stroke='%231a1a14' stroke-width='2.5'/%3E%3Cpath d='M20.5 20.5 29 29' stroke='%231a1a14' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M8.5 13h9' stroke='%231a1a14' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 13 13, zoom-out !important;
+}
+
+/* the motion itself is js/work.js runZoom (eased every frame); CSS only
+   keeps the tile still and the picture's origin where the maths expects */
+.work .work__tile.is-zoomed,
+.work .work__tile.is-zoomed:hover{ overflow: hidden; transform: none; }
+.work .work__tile img{ transform-origin: 0 0; }
+
+/* "Visit site" under a landing project's description (AI flow uses it). */
+.work__infoLink{
+  display: inline-block;
+  margin-top: .7rem;
+  font: 600 .82rem/1 var(--font);
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 194, 75, .35);
+  padding-bottom: .2em;
+}
+.work__infoLink:hover{ border-bottom-color: var(--accent); }
