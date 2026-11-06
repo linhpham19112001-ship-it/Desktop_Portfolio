@@ -800,7 +800,7 @@ const TOOL_ICONS = {
     // moving the pointer pans across it, click again (or leave) zooms out.
     // An empty slot has nothing to enlarge, so it stays inert.
     fig.addEventListener('click', (e) => {
-      if (fig.classList.contains('is-empty')) return;
+      if (fig.classList.contains('is-empty') || fig.classList.contains('is-loading')) return;
       if (fig.classList.contains('is-zoomed')) { zoomOut(fig); return; }
       zoomIn(fig, e);
     });
@@ -810,7 +810,14 @@ const TOOL_ICONS = {
     const img = document.createElement('img');
     img.loading = 'lazy';
     img.alt = `${label} — ${n}`;
-    img.src = path;
+    // Visual Design's landing images are several MB each: load them with a
+    // real progress bar instead of an empty pane that suddenly pops.
+    if (!isFlat(current) && current.layout === 'landing'){
+      img.loading = 'eager';
+      loadWithProgress(fig, img, path);
+    } else {
+      img.src = path;
+    }
 
     // Nothing there yet: say exactly which file this slot wants.
     img.addEventListener('error', () => {
@@ -829,6 +836,62 @@ const TOOL_ICONS = {
 
     fig.appendChild(img);
     return fig;
+  }
+
+  /* ---- loading with progress -----------------------------------
+     Streams the file with fetch so the bar follows the real bytes
+     (Content-Length), then decodes the picture before showing it, so
+     the long landing images arrive in one smooth step instead of a
+     blank wait and a stall. Each file is kept as a blob URL for the
+     visit, so opening the same project again is instant. Anything that
+     goes wrong falls back to a plain <img src>, which also keeps the
+     "file still to come" placeholder working. */
+
+  const blobCache = new Map();   // path → object URL
+
+  async function loadWithProgress(fig, img, path){
+    if (blobCache.has(path)){ img.src = blobCache.get(path); return; }
+    fig.classList.add('is-loading');
+    const bar = document.createElement('div');
+    bar.className = 'work__load';
+    bar.innerHTML = '<div class="work__loadTrack"><i></i></div><span>Loading…</span>';
+    fig.appendChild(bar);
+    const fill = bar.querySelector('i');
+    const text = bar.querySelector('span');
+    const mb = (b) => (b / 1048576).toFixed(1);
+    try {
+      const res = await fetch(path);
+      if (!res.ok || !res.body) throw new Error(String(res.status));
+      const total = Number(res.headers.get('content-length')) || 0;
+      if (!total) bar.classList.add('is-indeterminate');
+      const reader = res.body.getReader();
+      const chunks = [];
+      let got = 0;
+      for (;;){
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        got += value.length;
+        if (total){
+          const p = Math.min(1, got / total);
+          fill.style.transform = `scaleX(${p})`;
+          text.textContent = `${Math.round(p * 100)}%  ·  ${mb(got)} / ${mb(total)} MB`;
+        } else {
+          text.textContent = `${mb(got)} MB`;
+        }
+      }
+      const url = URL.createObjectURL(new Blob(chunks, { type: res.headers.get('content-type') || 'image/jpeg' }));
+      blobCache.set(path, url);
+      fill.style.transform = 'scaleX(1)';
+      text.textContent = 'Preparing…';
+      img.src = url;
+      // decode before revealing; decode() can hang in a background tab, so it races a timeout
+      await Promise.race([img.decode().catch(() => {}), new Promise((r) => setTimeout(r, 3000))]);
+    } catch {
+      img.src = path;
+    }
+    fig.classList.remove('is-loading');
+    bar.remove();
   }
 
   /* ---- zoom in place ------------------------------------------
