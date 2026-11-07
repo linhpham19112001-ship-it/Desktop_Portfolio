@@ -34,6 +34,9 @@ http.createServer((req, res) => {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }).end('404 — ' + rel); return; }
     res.writeHead(200, {
       'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
+      // Lets the portfolio's image loader show a real percentage, the way a
+      // real host does.
+      'Content-Length': buf.length,
       // no-store, not just no-cache: this is a preview server for files that
       // change on disk between requests, and no-cache alone (with no ETag to
       // revalidate against) still lets some browsers serve a stale copy

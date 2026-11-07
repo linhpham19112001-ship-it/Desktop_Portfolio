@@ -852,12 +852,26 @@ const TOOL_ICONS = {
   async function loadWithProgress(fig, img, path){
     if (blobCache.has(path)){ img.src = blobCache.get(path); return; }
     fig.classList.add('is-loading');
+    // The tile is exactly one pane tall while it loads, scrolled to the
+    // top, so the loader sits dead centre of what is on screen — a tall
+    // tile would otherwise centre it somewhere below the fold.
+    const pane = gridEl.closest('.work__detail');
+    // The first project loads while the shelf is still opening and the
+    // pane has no height yet, so keep measuring until it has one.
+    (function fit(tries){
+      if (!pane || !fig.classList.contains('is-loading')) return;
+      if (pane.clientHeight){ pane.scrollTop = 0; fig.style.minHeight = pane.clientHeight + 'px'; }
+      else if (tries < 40) setTimeout(() => fit(tries + 1), 25);
+    })(0);
     const bar = document.createElement('div');
     bar.className = 'work__load';
-    bar.innerHTML = '<div class="work__loadTrack"><i></i></div><span>Loading…</span>';
+    bar.innerHTML = '<b class="work__loadPct">0<small>%</small></b>' +
+      '<div class="work__loadTrack"><i></i></div>' +
+      '<span class="work__loadNote">Loading the full page</span>';
     fig.appendChild(bar);
     const fill = bar.querySelector('i');
-    const text = bar.querySelector('span');
+    const pct  = bar.querySelector('.work__loadPct');
+    const text = bar.querySelector('.work__loadNote');
     const mb = (b) => (b / 1048576).toFixed(1);
     try {
       const res = await fetch(path);
@@ -875,14 +889,16 @@ const TOOL_ICONS = {
         if (total){
           const p = Math.min(1, got / total);
           fill.style.transform = `scaleX(${p})`;
-          text.textContent = `${Math.round(p * 100)}%  ·  ${mb(got)} / ${mb(total)} MB`;
+          pct.innerHTML = `${Math.round(p * 100)}<small>%</small>`;
+          text.textContent = `${mb(got)} / ${mb(total)} MB`;
         } else {
-          text.textContent = `${mb(got)} MB`;
+          pct.innerHTML = `${mb(got)}<small>MB</small>`;
         }
       }
       const url = URL.createObjectURL(new Blob(chunks, { type: res.headers.get('content-type') || 'image/jpeg' }));
       blobCache.set(path, url);
       fill.style.transform = 'scaleX(1)';
+      pct.innerHTML = '100<small>%</small>';
       text.textContent = 'Preparing…';
       img.src = url;
       // decode before revealing; decode() can hang in a background tab, so it races a timeout
@@ -891,6 +907,7 @@ const TOOL_ICONS = {
       img.src = path;
     }
     fig.classList.remove('is-loading');
+    fig.style.minHeight = '';
     bar.remove();
   }
 
