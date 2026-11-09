@@ -197,7 +197,7 @@ const ITEMS = [
     work:  'ai',
     title: 'AI flow'
   },
-  // The chalkboard on the wall, right of the monitor ("Please click on the
+  // The board on the wall, right of the monitor ("Please click on the
   // items…"). Its shadow is decor; the board itself is an action: one quick
   // sweep of light across every clickable object (runTour below). Both
   // sit at the back of the paint order — they hang on the wall.
@@ -433,10 +433,10 @@ const ACTIONS = {
   lights:  { label: 'Desk lamp — toggle dark mode', cta: 'toggle',  run: toggleLamp   },
   cursor:  { label: 'Mouse — change the pointer',   cta: 'toggle',  run: cycleCursor  },
   contact: { label: 'Sticky note — contact me',     cta: 'contact', run: openContact  },
-  tour:    { label: 'Chalkboard — show everything you can click', cta: 'show me', run: runTour }
+  tour:    { label: 'Board — show everything you can click', cta: 'show me', run: runTour }
 };
 
-/* The chalkboard's sweep: every clickable object lights up in turn, left
+/* The board's sweep: every clickable object lights up in turn, left
    to right, each outline fading in and out so they overlap into one quick
    wave across the desk. Drawn by render() while `tour` is set. */
 const TOUR_STAGGER = 45;     // ms between one object and the next
@@ -1153,7 +1153,7 @@ function render(){
       paintOutline(hovered, HOVER_COLOR, HOVER_WIDTH * k, 1, GLOW * 0.6);
     }
 
-    // Chalkboard sweep: a sine envelope per object, staggered left to right.
+    // Board sweep: a sine envelope per object, staggered left to right.
     if (tour){
       const now = performance.now() - tour.start;
       ctx.filter = `blur(${(0.9 * dpr).toFixed(1)}px)`;   // soft edge, still a line
