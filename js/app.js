@@ -196,6 +196,21 @@ const ITEMS = [
     z: 102,
     work:  'ai',
     title: 'AI flow'
+  },
+  // The chalkboard on the wall, right of the monitor ("Please click on the
+  // items…"). Its shadow is decor; the board itself is an action: one quick
+  // sweep of light across every clickable object (runTour below). Both
+  // sit at the back of the paint order — they hang on the wall.
+  {
+    file: 'assets/board/bong.png', x: 2963, y: 306, w: 701, h: 955,
+    z: 1,
+    decor: true
+  },
+  {
+    file: 'assets/board/board.png', x: 2963, y: 306, w: 630, h: 859,
+    z: 2,
+    action: 'tour',
+    title: 'Not sure where to click?'
   }
 ];
 
@@ -417,8 +432,23 @@ function buildSrNav(){
 const ACTIONS = {
   lights:  { label: 'Desk lamp — toggle dark mode', cta: 'toggle',  run: toggleLamp   },
   cursor:  { label: 'Mouse — change the pointer',   cta: 'toggle',  run: cycleCursor  },
-  contact: { label: 'Sticky note — contact me',     cta: 'contact', run: openContact  }
+  contact: { label: 'Sticky note — contact me',     cta: 'contact', run: openContact  },
+  tour:    { label: 'Chalkboard — show everything you can click', cta: 'show me', run: runTour }
 };
+
+/* The chalkboard's sweep: every clickable object lights up in turn, left
+   to right, each outline fading in and out so they overlap into one quick
+   wave across the desk. Drawn by render() while `tour` is set. */
+const TOUR_STAGGER = 45;     // ms between one object and the next
+const TOUR_LIFE    = 380;    // ms each outline is visible
+const TOUR_ALPHA   = 0.65;   // peak opacity — a glimmer, not a selection
+let tour = null;             // { start, order } while the sweep runs
+
+function runTour(){
+  const order = [...SELECTABLE].sort((a, b) => ITEMS[a].x - ITEMS[b].x);
+  tour = { start: performance.now(), order };
+  render();
+}
 
 function toggleLamp(){
   document.body.classList.toggle('is-lights-off');
@@ -1123,7 +1153,20 @@ function render(){
       paintOutline(hovered, HOVER_COLOR, HOVER_WIDTH * k, 1, GLOW * 0.6);
     }
 
-    if (selected >= 0) rafId = requestAnimationFrame(draw);
+    // Chalkboard sweep: a sine envelope per object, staggered left to right.
+    if (tour){
+      const now = performance.now() - tour.start;
+      ctx.filter = `blur(${(0.9 * dpr).toFixed(1)}px)`;   // soft edge, still a line
+      tour.order.forEach((i, n) => {
+        const p = (now - n * TOUR_STAGGER) / TOUR_LIFE;
+        if (p <= 0 || p >= 1 || i === selected) return;
+        partsOf(i).forEach(part => paintOutline(part, HOVER_COLOR, HOVER_WIDTH * k, TOUR_ALPHA * Math.sin(p * Math.PI), 0));
+      });
+      ctx.filter = 'none';
+      if (now > (tour.order.length - 1) * TOUR_STAGGER + TOUR_LIFE) tour = null;
+    }
+
+    if (selected >= 0 || tour) rafId = requestAnimationFrame(draw);
   };
 
   rafId = requestAnimationFrame(draw);

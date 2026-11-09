@@ -729,6 +729,12 @@ const TOOL_ICONS = {
     gridEl.textContent = '';
     const { label, count } = activeSet();
 
+    // Drop a Branding board's fixed ratio before anything else: the early
+    // returns below (AI flow, empty shelf) would otherwise inherit it and
+    // squeeze into a tall narrow box after Branding was opened.
+    gridEl.classList.remove('work__grid--board');
+    gridEl.style.aspectRatio = '';
+
     // AI flow builds its showcase live instead of laying out tiles — see
     // js/swarm.js. The screenshot (if any) lands at the end of the build.
     if (current.layout === 'swarm' && window.swarmBuild){
