@@ -367,18 +367,26 @@ body{
 }
 
 /* ------------------------------------------------------------
-   Labels toggle — top-left, right under the site name
+   Menu bar — top-left: name · Work ▾ · About ▾ · Contact · tools
+   One dark-glass bar, like a desktop menu bar shrunk to a pill.
+   Built by bindHomebar() in js/app.js.
    ------------------------------------------------------------ */
 
-/* Under the brand rather than in a bottom corner: top-left is where the
-   eye lands first on this page, and down in the corner it read as chrome
-   nobody was meant to touch. `left` matches the HUD's own padding so the
-   pill's edge lines up with the name above it. */
 .homebar{
   position: fixed;
   z-index: 960;
   left: clamp(.9rem, 2.2vw, 1.8rem);
   top: clamp(.9rem, 2.2vw, 1.8rem);
+  display: flex;
+  align-items: center;
+  gap: .15rem;
+  padding: .3rem;
+  border-radius: 999px;
+  background: rgba(10, 12, 8, .62);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid rgba(255, 233, 176, .14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .04);
   opacity: 0;
   pointer-events: none;
   transition: opacity .6s var(--ease);
@@ -387,135 +395,133 @@ body{
 /* Zoomed in there is one object on screen; the bar steps aside. */
 .is-zoomed .homebar{ opacity: 0; pointer-events: none; }
 
-.homebar__btn,
-.homebar__menu{
-  background: rgba(10, 12, 8, .6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 233, 176, .16);
-  color: var(--ink);
+.homebar svg{
+  width: 15px; height: 15px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.homebar__btn{
+.homebar__brand{
   display: flex;
   align-items: center;
-  gap: .65em;
-  padding: .6em .9em .6em 1em;
-  border-radius: 999px;
-  font: 700 clamp(11px, 1vw, 13px)/1 var(--mono);
+  gap: .6em;
+  padding: 0 .7rem 0 .75rem;
+  font: 700 clamp(11px, .95vw, 12.5px)/1 var(--mono);
   letter-spacing: .2em;
   text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.homebar__sep{
+  width: 1px;
+  height: 1.1rem;
+  margin: 0 .2rem;
+  background: rgba(255, 233, 176, .14);
+}
+
+.homebar__menus{ display: flex; align-items: center; gap: .1rem; }
+.homebar__menu{ position: relative; }
+
+.homebar__top,
+.homebar__tool{
+  display: flex;
+  align-items: center;
+  gap: .45em;
+  height: 2.05rem;
+  padding: 0 .75rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-dim);
+  font: 500 13px/1 var(--font);
+  white-space: nowrap;
   cursor: pointer;
-  transition: background .2s, border-color .2s;
+  transition: background .16s, color .16s;
 }
-.homebar__btn:hover,
-.homebar.is-open .homebar__btn{ background: rgba(20, 24, 16, .85); border-color: rgba(255, 233, 176, .3); }
-
-.homebar__chev{
-  width: 1em; height: 1em;
-  fill: none; stroke: currentColor; stroke-width: 1.6;
-  stroke-linecap: round; stroke-linejoin: round;
-  opacity: .7;
-  transition: transform .22s var(--ease);
+.homebar__tool{ width: 2.05rem; padding: 0; justify-content: center; }
+.homebar__top:hover,
+.homebar__tool:hover,
+.homebar__menu.is-open .homebar__top{
+  color: var(--ink);
+  background: rgba(255, 233, 176, .09);
 }
-.homebar.is-open .homebar__chev{ transform: rotate(180deg); }
 
-.homebar__menu{
+.homebar__chev{ width: 10px !important; height: 10px !important; opacity: .6; transition: transform .2s var(--ease); }
+.homebar__menu.is-open .homebar__chev{ transform: rotate(180deg); }
+
+/* Tools: lit amber while on. */
+.labels[aria-checked="true"],
+.homebar__tool[aria-pressed="true"]{
+  color: #17190f;
+  background: var(--accent);
+  box-shadow: 0 0 14px rgba(255, 194, 75, .4);
+}
+
+/* Drop-downs */
+.homebar__drop{
   position: absolute;
-  top: calc(100% + .5rem);
-  left: 0;
-  min-width: 15rem;
-  padding: .45rem;
+  top: calc(100% + .55rem);
+  left: -.1rem;
+  min-width: 13.5rem;
+  padding: .4rem;
   border-radius: 1rem;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+  background: rgba(14, 16, 11, .9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 233, 176, .14);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .5);
   opacity: 0;
   transform: translateY(-6px) scale(.98);
   transform-origin: top left;
-  transition: opacity .2s var(--ease), transform .2s var(--ease);
+  transition: opacity .18s var(--ease), transform .18s var(--ease);
 }
-.homebar.is-open .homebar__menu{ opacity: 1; transform: none; }
+.homebar__menu.is-open .homebar__drop{ opacity: 1; transform: none; }
 
-.labels,
 .homebar__item{
   display: flex;
   align-items: center;
   width: 100%;
-  gap: .6em;
-  padding: .7em .75em;
+  gap: .7em;
+  padding: .5rem .6rem;
   border: 0;
-  border-radius: .6rem;
+  border-radius: .65rem;
   background: none;
   color: var(--ink);
-  font: 500 14px/1.2 var(--font);
+  font: 500 13.5px/1.2 var(--font);
   text-align: left;
   cursor: pointer;
-  transition: background .15s;
+  transition: background .14s;
 }
-.labels:hover,
-.homebar__item:hover{ background: rgba(255, 233, 176, .08); }
-.labels__text{ flex: 1; }
-.labels kbd{ font-size: .78em; padding: .2em .45em; }
-
-.homebar__head{
-  margin: .35rem .75rem .25rem;
-  padding-top: .55rem;
-  border-top: 1px solid rgba(255, 233, 176, .12);
-  font: 700 10px/1 var(--mono);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-}
-
-/* The switch. Everything is in `em` so it scales with the button's own
-   clamped font size instead of drifting away from the text beside it. */
-.labels__track{
-  position: relative;
+.homebar__ico{
+  display: grid;
+  place-items: center;
+  width: 1.75rem; height: 1.75rem;
   flex: none;
-  width: 2.3em;
-  height: 1.2em;
-  border-radius: 999px;
-  background: rgba(244, 239, 226, .14);
-  border: 1px solid rgba(255, 233, 176, .2);
-  transition: background .24s var(--ease), border-color .24s var(--ease),
-              box-shadow .24s var(--ease);
+  border-radius: .5rem;
+  background: rgba(255, 233, 176, .07);
+  color: var(--accent);
+  transition: background .14s;
 }
+.homebar__item:hover{ background: rgba(255, 233, 176, .08); }
+.homebar__item:hover .homebar__ico{ background: rgba(255, 194, 75, .18); }
 
-.labels__knob{
-  position: absolute;
-  top: 50%;
-  left: .12em;
-  width: .84em;
-  height: .84em;
-  margin-top: -.42em;
-  border-radius: 50%;
-  background: var(--ink-dim);
-  transition: transform .26s var(--ease), background .24s var(--ease);
-}
-
-/* On: the switch takes the accent and the knob slides right. The pill
-   around it deliberately stays dark in both states — the switch is what
-   carries the state, and flipping the whole control amber as well would
-   say it twice. */
-.labels[aria-checked="true"] .labels__track{
-  background: var(--accent);
-  border-color: transparent;
-  box-shadow: 0 0 12px rgba(255, 194, 75, .4);
-}
-/* Travel is derived, not eyeballed: the track's inner width (2.3em less its
-   two 1px borders) minus the knob and its inset at each end. That leaves the
-   same .12em gap on the right when it is on as on the left when it is off,
-   at any font size the clamp() above lands on. */
-.labels[aria-checked="true"] .labels__knob{
-  transform: translateX(calc(2.3em - 2px - .84em - .24em));
-  background: #17190f;
-}
-.labels[aria-checked="true"]{ border-color: rgba(255, 233, 176, .34); }
-
-.labels:focus-visible,
-.homebar__btn:focus-visible,
+.homebar__top:focus-visible,
+.homebar__tool:focus-visible,
 .homebar__item:focus-visible{
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Not much width (landscape phone, small window): icons only up top. */
+@media (max-width: 900px){
+  .homebar__top span{ display: none; }
+  .homebar__top{ padding: 0 .55rem; }
+  .homebar__chev{ display: none; }
 }
 
 /* ------------------------------------------------------------
@@ -1297,7 +1303,7 @@ kbd{
   .panel.is-open{ transform: none; }
 
   .hint{ font-size: 11px; }
-  .labels kbd{ display: none; }   /* no keyboard to press it with */
+
 
   /* The card drops the copy/open buttons to a second line rather than
      letting the handle shrink to nothing — the handle is the content. */

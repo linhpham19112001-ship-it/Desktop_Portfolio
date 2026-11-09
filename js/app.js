@@ -560,43 +560,127 @@ function bindLabels(){
   bindHomebar();
 }
 
-/* ---- home bar -----------------------------------------------
-   The pill top-left. Opens a small menu holding the labels switch and
-   one row per section; picking a row closes the menu and selects that
-   object exactly as clicking it on the desk would. The labels switch
-   leaves the menu open so its effect can be seen behind it. */
-function bindHomebar(){
-  const bar  = $('#homebar');
-  const btn  = $('#homebarBtn');
-  const menu = $('#homebarMenu');
-  const list = $('#homebarList');
+/* ---- menu bar -----------------------------------------------
+   Top-left: the name, then "Work" and "About" menus and a direct
+   "Contact", then the labels and lamp tools. Every row selects its
+   object exactly as clicking it on the desk would. Rows are found by
+   the object's title, so a renamed object just drops out of the menu
+   (it stays reachable on the desk) instead of breaking it.
+   Like a desktop menu bar: once one menu is open, hovering the next
+   title switches to it. */
 
-  SELECTABLE.forEach((i) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'homebar__item';
-    b.textContent = ITEMS[i].title;
-    b.addEventListener('click', () => { close(); select(i); });
-    list.appendChild(b);
+// 24px stroke icons, drawn for this bar (currentColor, no fill).
+const MENU_ICONS = {
+  work:        '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7M3 12h18"/>',
+  about:       '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/>',
+  contact:     '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>',
+  branding:    '<path d="M12 3 4 8l8 13 8-13z"/><path d="M4 8h16M12 3v18"/>',
+  visual:      '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="9.5" r="1.8"/><path d="m21 16-5-5-9 9"/>',
+  motion:      '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
+  posm:        '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  ai:          '<path d="M10 4c.6 3.6 2.4 5.4 6 6-3.6.6-5.4 2.4-6 6-.6-3.6-2.4-5.4-6-6 3.6-.6 5.4-2.4 6-6z"/><path d="M18 15c.3 1.4.9 2 2.3 2.3-1.4.3-2 .9-2.3 2.3-.3-1.4-.9-2-2.3-2.3 1.4-.3 2-.9 2.3-2.3z"/>',
+  freelancer:  '<path d="M4 20V10l8-6 8 6v10z"/><path d="M10 20v-5h4v5"/>',
+  photography: '<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/>',
+  profile:     '<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.6"/><path d="M8 17c.6-1.8 2.1-2.8 4-2.8s3.4 1 4 2.8"/>',
+  experience:  '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  workflow:    '<circle cx="5.5" cy="6" r="2.2"/><circle cx="18.5" cy="12" r="2.2"/><circle cx="5.5" cy="18" r="2.2"/><path d="M7.7 6h3.8a3 3 0 0 1 3 3v3h1.8M7.7 18h3.8a3 3 0 0 0 3-3v-3"/>'
+};
+const MENU = [
+  { label: 'Work', icon: 'work', rows: [
+    ['Branding', 'branding'], ['Visual Design', 'visual'], ['Motion Graphic & 3D', 'motion'],
+    ['POSM & Event', 'posm'], ['AI flow', 'ai'],
+    ['Freelancer 2020 — 2026', 'freelancer', 'Freelancer'], ['Photography', 'photography']
+  ] },
+  { label: 'About', icon: 'about', rows: [
+    ['Profile', 'profile'], ['Experience', 'experience'], ['Workflow', 'workflow']
+  ] },
+  { label: 'Contact', icon: 'contact', direct: 'Contact' }
+];
+const svgIcon = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${MENU_ICONS[k]}</svg>`;
+
+function bindHomebar(){
+  const bar   = $('#homebar');
+  const menus = $('#homebarMenus');
+  const byTitle = (t) => SELECTABLE.find(i => ITEMS[i].title === t);
+  let current = null;                  // the open menu's wrapper, if any
+
+  MENU.forEach((m) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'homebar__menu';
+    const top = document.createElement('button');
+    top.type = 'button';
+    top.className = 'homebar__top';
+    top.setAttribute('role', 'menuitem');
+    top.innerHTML = `${svgIcon(m.icon)}<span>${m.label}</span>`;
+    wrap.appendChild(top);
+
+    if (m.direct){
+      const i = byTitle(m.direct);
+      top.addEventListener('click', () => { closeAll(); if (i !== undefined) select(i); });
+    } else {
+      top.setAttribute('aria-haspopup', 'true');
+      top.setAttribute('aria-expanded', 'false');
+      top.insertAdjacentHTML('beforeend',
+        '<svg class="homebar__chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg>');
+      const drop = document.createElement('div');
+      drop.className = 'homebar__drop';
+      drop.setAttribute('role', 'menu');
+      drop.hidden = true;
+      m.rows.forEach(([title, icon, short]) => {
+        const i = byTitle(title);
+        if (i === undefined) return;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'homebar__item';
+        b.setAttribute('role', 'menuitem');
+        b.innerHTML = `<span class="homebar__ico">${svgIcon(icon)}</span><span>${short || title}</span>`;
+        b.addEventListener('click', () => { closeAll(); select(i); });
+        drop.appendChild(b);
+      });
+      wrap.appendChild(drop);
+      top.addEventListener('click', () => (current === wrap ? closeAll() : open(wrap)));
+      top.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'mouse' && current && current !== wrap) open(wrap);
+      });
+    }
+    menus.appendChild(wrap);
   });
 
-  function open(){
-    menu.hidden = false;
-    btn.setAttribute('aria-expanded', 'true');
-    void menu.offsetWidth;            // commit the hidden state so the fade runs
-    bar.classList.add('is-open');
+  function open(wrap){
+    if (current && current !== wrap) shut(current);
+    const drop = wrap.querySelector('.homebar__drop');
+    drop.hidden = false;
+    void drop.offsetWidth;             // commit the hidden state so the fade runs
+    wrap.classList.add('is-open');
+    wrap.querySelector('.homebar__top').setAttribute('aria-expanded', 'true');
+    current = wrap;
   }
-  function close(){
-    if (menu.hidden) return;
-    bar.classList.remove('is-open');
-    btn.setAttribute('aria-expanded', 'false');
-    setTimeout(() => { if (!bar.classList.contains('is-open')) menu.hidden = true; }, 220);
+  function shut(wrap){
+    const drop = wrap.querySelector('.homebar__drop');
+    wrap.classList.remove('is-open');
+    wrap.querySelector('.homebar__top').setAttribute('aria-expanded', 'false');
+    setTimeout(() => { if (!wrap.classList.contains('is-open')) drop.hidden = true; }, 200);
+  }
+  function closeAll(){
+    if (current) shut(current);
+    current = null;
   }
 
-  btn.addEventListener('click', () => (menu.hidden ? open() : close()));
-  document.addEventListener('pointerdown', (e) => { if (!bar.contains(e.target)) close(); });
+  // Lamp: the same switch as the lamp on the desk, kept in sync either way.
+  const lamp = $('#lampTool');
+  lamp.addEventListener('click', toggleLamp);
+  const syncLamp = () => lamp.setAttribute('aria-pressed', String(document.body.classList.contains('is-lights-off')));
+  new MutationObserver(syncLamp).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  syncLamp();
+
+  document.addEventListener('pointerdown', (e) => { if (!bar.contains(e.target)) closeAll(); });
   bar.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape'){ e.stopPropagation(); close(); btn.focus(); }
+    if (e.key === 'Escape' && current){
+      e.stopPropagation();
+      const top = current.querySelector('.homebar__top');
+      closeAll();
+      top.focus();
+    }
   });
 }
 
