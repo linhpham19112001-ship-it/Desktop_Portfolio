@@ -1226,12 +1226,68 @@ kbd{
 }
 
 /* ------------------------------------------------------------
-   Narrow screens — let the desk pan sideways instead of shrinking
+   Phones — same layout as desktop, viewed in landscape
+   The desk always fits whole (no sideways panning); a phone held
+   upright gets the .rotate notice instead.
    ------------------------------------------------------------ */
 
+/* dvh: the visible height, without the browser bar a phone tucks away. */
+@supports (height: 100dvh){
+  .stage{ width: min(100vw, calc(100dvh * 4096 / 2287)); }
+}
+
+.hint__touch{ display: none; }
+@media (hover: none){
+  .hint__mouse{ display: none; }
+  .hint__touch{ display: inline; }
+}
+
+.rotate{ display: none; }
+@media (orientation: portrait) and (hover: none) and (pointer: coarse){
+  .rotate{
+    position: fixed;
+    inset: 0;
+    z-index: 2100;                     /* above the loader too */
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 40%, rgba(255, 194, 75, .1), transparent 60%), var(--backdrop);
+  }
+}
+.rotate__phone{
+  width: 4.5rem; height: 4.5rem;
+  fill: none;
+  stroke: var(--accent, #ffc24b);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  animation: rotatePhone 2.4s var(--ease) infinite;
+}
+@keyframes rotatePhone{
+  0%, 20%   { transform: rotate(0deg); }
+  45%, 75%  { transform: rotate(-90deg); }
+  100%      { transform: rotate(0deg); }
+}
+.rotate__title{
+  margin: 1.4rem 0 .5rem;
+  font: 700 1.15rem/1.2 var(--font);
+  color: var(--ink);
+}
+.rotate__text{
+  margin: 0 auto;
+  max-width: 17rem;
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+/* Landscape phone: ~330–430px tall. Same layout, just tighter chrome. */
+@media (orientation: landscape) and (max-height: 500px){
+  .hud{ padding: .55rem .8rem; }
+  .hint{ bottom: .45rem; font-size: 10px; padding: .4em .85em; }
+}
+
 @media (max-width: 820px){
-  .viewport{ display: block; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
-  .stage{ width: calc(100vh * 4096 / 2287); height: 100vh; aspect-ratio: auto; }
   .panel{
     top: auto; bottom: 0; right: 0; left: 0;
     width: 100%;

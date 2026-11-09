@@ -351,7 +351,7 @@
    beside.
    ------------------------------------------------------------ */
 
-@media (max-width: 760px){
+@media (max-width: 760px) and (orientation: portrait){
   .flow__board{
     --hop-y: 2.2rem;
     grid-template-columns: 1fr;
