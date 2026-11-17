@@ -1058,3 +1058,16 @@ html.has-custom-cursor .work .work__tile.is-zoomed *{
   .work[data-layout="landing"] .work__body,
   .work[data-info="list"] .work__body{ grid-template-columns: minmax(170px, 34%) 1fr; }
 }
+
+/* Visual Design's opening intro (js/work.js showIntro): one animated
+   WebP filling the right pane's width, before any project is picked. */
+.work__intro{
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: #000;
+  aspect-ratio: 16 / 9;
+  animation: workIntroIn .5s ease both;
+}
+@keyframes workIntroIn{ from{ opacity: 0; } to{ opacity: 1; } }

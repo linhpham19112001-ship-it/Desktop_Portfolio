@@ -112,6 +112,13 @@ const BRAND_BOARD = {
   ]
 };
 
+// Percept's own board: the shared one plus a 20th piece (the November
+// birthday mail, 16:9) as a full-width closing row under the last one.
+const PERCEPT_BOARD = {
+  w: 1944, h: 4662 + 24 + 1093.5,
+  tiles: [...BRAND_BOARD.tiles, [20, 0, 4686, 1944, 1093.5]]
+};
+
 const WORK = [
   {
     key: 'branding',
@@ -126,8 +133,8 @@ const WORK = [
     // the one place different projects are allowed to feel different,
     // because an identity system is not a repeatable ad unit.
     projects: [
-      { name: 'Percept', slug: 'percept', shots: 19, ext: 'jpg', frame: 'bento', desc: '',
-        board: BRAND_BOARD },
+      { name: 'Percept', slug: 'percept', shots: 20, ext: 'jpg', frame: 'bento', desc: '',
+        board: PERCEPT_BOARD },
 
       { name: 'FSEL', slug: 'fsel', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,
         meta: [
@@ -169,7 +176,9 @@ const WORK = [
       { name: 'Material Band', slug: 'matterial-band', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' },
       { name: 'Asterox',       slug: 'asterox',        shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,  desc: '' },
       { name: 'PL shopet',     slug: 'pl-shopet',      shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,    desc: '' },
-      { name: 'Broker by Trade (BBT)', slug: 'broker-by-trade', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' }
+      { name: 'Broker by Trade (BBT)', slug: 'broker-by-trade', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' },
+      { name: 'Alpha Media',   slug: 'alpha-media',    shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' },
+      { name: 'Parro.mood19',  slug: 'parro-mood19',   shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' }
     ]
   },
   {
@@ -187,6 +196,9 @@ const WORK = [
     // the moment it gets `shots: 1` and a file at
     // assets/work/visual/<slug>/01.webp; the flag itself can stay.
     layout: 'landing',
+    // Shown on opening, before any project is picked (an animated WebP made
+    // from the designer's GIF: 1280px, about 5MB, only fetched on open).
+    intro: 'assets/work/visual/_intro/intro.webp',
     bare: true,
     projects: [
       // DEMO: a low-res reference (272px wide, from ref gird/) standing in
@@ -214,7 +226,7 @@ const WORK = [
         meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Key visual' } ],
         tools: ['photoshop'],
         desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
-      { name: 'First Support', slug: 'first-support', shots: 1, file: DEMO_LANDING[0],
+      { name: 'First Support', slug: 'first-support', shots: 1, file: 'assets/work/visual/first-support/1.jpg',
         time:  { from: '2024-01', to: '2024-02' },
         meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Social campaign' } ],
         tools: ['figma', 'photoshop'],
@@ -254,7 +266,7 @@ const WORK = [
         meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Product visuals' } ],
         tools: ['figma', 'photoshop'],
         desc:  'Demo description — two short sentences about what the brief was and what you made. Replace with the real story of this project.' },
-      { name: 'Lumi Sport', slug: 'lumi', shots: 1, file: DEMO_LANDING[0],
+      { name: 'Lumi Sport', slug: 'lumi', shots: 1, file: 'assets/work/visual/lumi/1.jpg',
         time:  { from: '2025-06', to: '2025-09' },
         meta:  [ { label: 'Role', value: 'Visual designer' }, { label: 'Type', value: 'Campaign visuals' } ],
         tools: ['photoshop', 'illustrator'],
@@ -329,7 +341,12 @@ const WORK = [
         desc: 'The personal-brand site for Kien Phan, finance broker and founder of Fundwise Capital Australia. Designed and built end to end with Claude Code, from awards and reviews down to the strategy-session booking form, shipped through a staging → production flow.' },
       { name: '8DIGIT — studio website', slug: '8digit-web', shots: 1, ext: 'jpg',
         time: { from: '2026-07', to: '2026-07' }, link: 'https://www.8digit.com.au/',
-        desc: 'The website for 8DIGIT, a growth partner for professional services: strategy, brand, performance marketing and martech as one system. Design, motion and build done together with AI.' }
+        desc: 'The website for 8DIGIT, a growth partner for professional services: strategy, brand, performance marketing and martech as one system. Design, motion and build done together with AI.' },
+      // 8digit tools is an internal app run locally: no public link, and no
+      // screenshot yet, so the crew draws the generic wireframe only.
+      { name: '8digit tools — Social Studio', slug: '8digit-tools', shots: 0,
+        time: { from: '2026-10', to: '2026-11' },
+        desc: 'An in-house app for the 8DIGIT team. Social Studio turns a brief and a brand’s own .md files into on-brand social posts: Claude writes the copy and lays out the page, image layers are rendered by AI, and every concept exports as layered SVG, PNG and PSD ready to finish by hand.' }
     ]
   },
   {
@@ -428,7 +445,8 @@ const TOOL_ICONS = {
     } else {
       countEl.textContent = cat.projects.length + (cat.projects.length === 1 ? ' project' : ' projects');
       buildList();
-      if (cat.projects.length) showProject(0);
+      if (cat.projects.length && cat.intro) showIntro();
+      else if (cat.projects.length) showProject(0);
       else showEmpty();
     }
 
@@ -672,6 +690,29 @@ const TOOL_ICONS = {
     root.dataset.frame = p.frame || 'identity';
 
     fillGrid();
+    gridEl.scrollTop = 0;
+  }
+
+  // A shelf with an `intro` opens on it, with no project picked yet:
+  // nothing in the list is lit, and the right pane plays the intro edge to
+  // edge until a project is clicked (or the arrow keys pick one).
+  function showIntro(){
+    project = -1;
+    listEl.querySelectorAll('.work__item').forEach(b => b.classList.remove('is-on'));
+    setItemInfo(null);
+    nameEl.textContent = '';
+    setMeta(null);
+    setTools(null);
+    setDesc(null);
+    gridEl.textContent = '';
+    gridEl.classList.remove('work__grid--board');
+    gridEl.style.aspectRatio = '';
+    const img = document.createElement('img');
+    img.className = 'work__intro';
+    img.src = current.intro;
+    img.alt = current.title;
+    img.decoding = 'async';
+    gridEl.appendChild(img);
     gridEl.scrollTop = 0;
   }
 
