@@ -1063,11 +1063,11 @@ html.has-custom-cursor .work .work__tile.is-zoomed *{
    WebP filling the right pane's width, before any project is picked. */
 .work__intro{
   display: block;
+  grid-column: 1 / -1;   /* Branding's grid has columns: span them all */
   width: 100%;
   height: auto;
   border-radius: 10px;
   background: #000;
-  aspect-ratio: 16 / 9;
   animation: workIntroIn .5s ease both;
 }
 @keyframes workIntroIn{ from{ opacity: 0; } to{ opacity: 1; } }

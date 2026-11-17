@@ -123,6 +123,8 @@ const WORK = [
   {
     key: 'branding',
     title: 'Branding',
+    // Shown on opening, before a brand is picked (see showIntro).
+    intro: 'assets/work/branding/_intro/intro.webp',
     blurb: 'Identity systems — the part that has to survive a thousand hands.',
     // Same split as Visual Design: the right pane is only the showcase, and
     // each project's dates and `desc` open under its name in the list.
