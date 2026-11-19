@@ -206,7 +206,9 @@ const WORK = [
       // DEMO: a low-res reference (272px wide, from ref gird/) standing in
       // for the real landing image, so the layout can be judged now. Drop
       // `ext` and replace with 01.webp at ~1600px wide when the real one exists.
-      { name: 'FSEL (Five-Star E-Learning)', slug: 'fsel', shots: 1, file: 'assets/work/visual/fsel/1.jpg',
+      { name: 'FSEL (Five-Star E-Learning)', slug: 'fsel', shots: 1, file: 'assets/work/visual/fsel/1a.webp',
+        // Too tall for one WebP (16,383px): two parts, 32 extra rows each side of the cut.
+        parts: ['assets/work/visual/fsel/1a.webp', 'assets/work/visual/fsel/1b.webp'],
         // DEMO values (invented) — replace with the real dates and words.
         time:  { from: '2024-03', to: '2024-06' },
         meta:  [ { label: 'Role', value: 'Brand & visual designer' },
@@ -840,6 +842,8 @@ const TOOL_ICONS = {
     }
   }
 
+  const PART_PAD = 32;       // extra source rows on each side of a cut in `parts`
+
   function tile(label, n){
     const path = shotPath(n);
     const fig = document.createElement('button');
@@ -859,11 +863,35 @@ const TOOL_ICONS = {
     const img = document.createElement('img');
     img.loading = 'lazy';
     img.alt = `${label} — ${n}`;
+    // A landing image taller than WebP allows (16,383px) is stored as
+    // `parts`: two or more files that share 64 source rows at each join (32
+    // extra rows on each side of the cut). Stacked in one wrapper, the upper
+    // part is clipped back to the cut, so the switch happens deep inside both
+    // files and never at an encoded edge — see .work__stack in css/work.css.
+    const parts = !isFlat(current) && current.layout === 'landing' && n === 1
+      ? current.projects[project].parts : null;
+    const imgs = [img];
+    let mount = img;
+    if (parts && parts.length > 1){
+      mount = document.createElement('div');
+      mount.className = 'work__stack';
+      mount.appendChild(img);
+      for (let i = 1; i < parts.length; i++){
+        const more = document.createElement('img');
+        more.alt = img.alt;
+        mount.appendChild(more);
+        imgs.push(more);
+      }
+      // Hide the extra rows below the cut on every part but the last.
+      imgs.slice(0, -1).forEach(el => el.addEventListener('load', () => {
+        el.style.clipPath = `inset(0 0 ${(PART_PAD / el.naturalHeight * 100).toFixed(4)}% 0)`;
+      }));
+    }
     // Visual Design's landing images are several MB each: load them with a
     // real progress bar instead of an empty pane that suddenly pops.
     if (!isFlat(current) && current.layout === 'landing'){
-      img.loading = 'eager';
-      loadWithProgress(fig, img, path);
+      imgs.forEach(el => { el.loading = 'eager'; });
+      loadWithProgress(fig, imgs, parts && parts.length > 1 ? parts : [path]);
     } else {
       img.src = path;
     }
@@ -880,10 +908,10 @@ const TOOL_ICONS = {
       tag.className = 'work__slot';
       tag.textContent = path.replace('assets/work/', '');
       fig.appendChild(tag);
-      img.remove();
+      mount.remove();
     });
 
-    fig.appendChild(img);
+    fig.appendChild(mount);
     return fig;
   }
 
@@ -898,8 +926,13 @@ const TOOL_ICONS = {
 
   const blobCache = new Map();   // path → object URL
 
-  async function loadWithProgress(fig, img, path){
-    if (blobCache.has(path)){ img.src = blobCache.get(path); return; }
+  // `imgs` and `paths` are matching lists (one entry unless the picture is
+  // stored in parts); the bar runs across all of them.
+  async function loadWithProgress(fig, imgs, paths){
+    if (paths.every(p => blobCache.has(p))){
+      imgs.forEach((el, i) => { el.src = blobCache.get(paths[i]); });
+      return;
+    }
     fig.classList.add('is-loading');
     // The tile is exactly one pane tall while it loads, scrolled to the
     // top, so the loader sits dead centre of what is on screen — a tall
@@ -923,37 +956,50 @@ const TOOL_ICONS = {
     const text = bar.querySelector('.work__loadNote');
     const mb = (b) => (b / 1048576).toFixed(1);
     try {
-      const res = await fetch(path);
-      if (!res.ok || !res.body) throw new Error(String(res.status));
-      const total = Number(res.headers.get('content-length')) || 0;
-      if (!total) bar.classList.add('is-indeterminate');
-      const reader = res.body.getReader();
-      const chunks = [];
-      let got = 0;
-      for (;;){
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        got += value.length;
-        if (total){
-          const p = Math.min(1, got / total);
-          fill.style.transform = `scaleX(${p})`;
-          pct.innerHTML = `${Math.round(p * 100)}<small>%</small>`;
-          text.textContent = `${mb(got)} / ${mb(total)} MB`;
-        } else {
-          pct.innerHTML = `${mb(got)}<small>MB</small>`;
+      const urls = [];
+      let before = 0;                       // bytes of the parts already in
+      for (let i = 0; i < paths.length; i++){
+        const path = paths[i];
+        if (blobCache.has(path)){ urls.push(blobCache.get(path)); continue; }
+        const res = await fetch(path);
+        if (!res.ok || !res.body) throw new Error(String(res.status));
+        const total = Number(res.headers.get('content-length')) || 0;
+        if (!total) bar.classList.add('is-indeterminate');
+        const reader = res.body.getReader();
+        const chunks = [];
+        let got = 0;
+        for (;;){
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          got += value.length;
+          if (total){
+            const p = (i + Math.min(1, got / total)) / paths.length;
+            fill.style.transform = `scaleX(${p})`;
+            pct.innerHTML = `${Math.round(p * 100)}<small>%</small>`;
+            text.textContent = paths.length > 1
+              ? `${mb(before + got)} MB`
+              : `${mb(got)} / ${mb(total)} MB`;
+          } else {
+            pct.innerHTML = `${mb(before + got)}<small>MB</small>`;
+          }
         }
+        before += got;
+        const url = URL.createObjectURL(new Blob(chunks, { type: res.headers.get('content-type') || 'image/jpeg' }));
+        blobCache.set(path, url);
+        urls.push(url);
       }
-      const url = URL.createObjectURL(new Blob(chunks, { type: res.headers.get('content-type') || 'image/jpeg' }));
-      blobCache.set(path, url);
       fill.style.transform = 'scaleX(1)';
       pct.innerHTML = '100<small>%</small>';
       text.textContent = 'Preparing…';
-      img.src = url;
+      imgs.forEach((el, i) => { el.src = urls[i]; });
       // decode before revealing; decode() can hang in a background tab, so it races a timeout
-      await Promise.race([img.decode().catch(() => {}), new Promise((r) => setTimeout(r, 3000))]);
+      await Promise.race([
+        Promise.all(imgs.map(el => el.decode().catch(() => {}))),
+        new Promise((r) => setTimeout(r, 3000))
+      ]);
     } catch {
-      img.src = path;
+      imgs.forEach((el, i) => { el.src = paths[i]; });
     }
     fig.classList.remove('is-loading');
     fig.style.minHeight = '';
@@ -1003,7 +1049,7 @@ const TOOL_ICONS = {
   function runZoom(fig){
     const s = zoomState(fig);
     if (s.raf) return;
-    const img = fig.querySelector('img');
+    const img = fig.querySelector('.work__stack') || fig.querySelector('img');
     const step = () => {
       s.z  += (s.tz - s.z)  * EASE;
       s.fx += (s.tx - s.fx) * EASE;

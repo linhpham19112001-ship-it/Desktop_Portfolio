@@ -1071,3 +1071,15 @@ html.has-custom-cursor .work .work__tile.is-zoomed *{
   animation: workIntroIn .5s ease both;
 }
 @keyframes workIntroIn{ from{ opacity: 0; } to{ opacity: 1; } }
+
+/* A landing image stored in parts (js/work.js, `parts`): the files share 64
+   source rows at each join (64 / 2400 of the width), and each later one is
+   pulled up over them. The upper part is clipped back to the cut line in JS,
+   so the switch happens in the interior of both files. The wrapper takes the
+   entrance and the zoom, so the parts always move as one. */
+.work__stack{ display: block; transform-origin: 0 0; animation: landIn .7s var(--ease) both; }
+.work__stack img{ position: relative; }
+.work__stack img + img{ margin-top: calc(-100% * 64 / 2400); z-index: 0; }
+.work__stack img:not(:last-child){ z-index: 1; }
+.work[data-layout="landing"] .work__stack img{ animation: none !important; transform: none; }
+@media (prefers-reduced-motion: reduce){ .work__stack{ animation: none !important; } }
