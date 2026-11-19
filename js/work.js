@@ -123,8 +123,6 @@ const WORK = [
   {
     key: 'branding',
     title: 'Branding',
-    // Shown on opening, before a brand is picked (see showIntro).
-    intro: 'assets/work/branding/_intro/intro.webp',
     blurb: 'Identity systems — the part that has to survive a thousand hands.',
     // Same split as Visual Design: the right pane is only the showcase, and
     // each project's dates and `desc` open under its name in the list.
@@ -198,9 +196,6 @@ const WORK = [
     // the moment it gets `shots: 1` and a file at
     // assets/work/visual/<slug>/01.webp; the flag itself can stay.
     layout: 'landing',
-    // Shown on opening, before any project is picked (an animated WebP made
-    // from the designer's GIF: 1280px, about 5MB, only fetched on open).
-    intro: 'assets/work/visual/_intro/intro.webp',
     bare: true,
     projects: [
       // DEMO: a low-res reference (272px wide, from ref gird/) standing in
