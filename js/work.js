@@ -119,33 +119,23 @@ const PERCEPT_BOARD = {
   tiles: [...BRAND_BOARD.tiles, [20, 0, 4686, 1944, 1093.5]]
 };
 
-// Material Band: its own bento (ver04, image/brand/Material Band/brand-guide/bento/).
+// Material Band: its own bento (v2, image/brand/Material Band/bento-v2/).
 const MATERIAL_BOARD = {
-  w: 1944, h: 5203,
+  w: 1944, h: 3370, bg: '#0C0C0E', radius: 0,
   tiles: [
-    [1, 0, 0, 921.29, 518.22],
-    [2, 945.29, 0, 683.11, 518.22],
-    [3, 1652.4, 0, 291.6, 518.22],
-    [4, 0, 542.22, 944.26, 629.51],
-    [5, 968.26, 542.22, 975.74, 629.51],
-    [6, 0, 1195.73, 611.83, 298.46],
-    [7, 0, 1518.18, 611.83, 298.46],
-    [8, 635.83, 1195.73, 818.48, 620.91],
-    [9, 1478.32, 1195.73, 465.68, 620.91],
-    [10, 0, 1840.64, 1320, 600],
-    [11, 1344, 1840.64, 600, 600],
-    [12, 0, 2464.64, 468, 403.03],
-    [13, 492, 2464.64, 468, 403.03],
-    [14, 984, 2464.64, 468, 403.03],
-    [15, 1476, 2464.64, 468, 403.03],
-    [16, 0, 2891.67, 1384.81, 668.99],
-    [17, 1408.81, 2891.67, 535.19, 668.99],
-    [18, 0, 3584.66, 946.09, 463.77],
-    [19, 970.09, 3584.66, 973.91, 463.77],
-    [20, 0, 4072.42, 1173.01, 566.67],
-    [21, 1197.01, 4072.42, 746.99, 566.67],
-    [22, 0, 4663.1, 960, 539.99],
-    [23, 984, 4663.1, 960, 539.99]
+    [1, 0, 0, 1280, 1280],
+    [2, 1328, 0, 616, 616],
+    [3, 1328, 664, 616, 616],
+    [4, 0, 1328, 1944, 216],
+    [5, 0, 1592, 450, 450],
+    [6, 498, 1592, 450, 450],
+    [7, 996, 1592, 450, 450],
+    [8, 1494, 1592, 450, 450],
+    [9, 0, 2090, 616, 616],
+    [10, 664, 2090, 1280, 616],
+    [11, 0, 2754, 616, 616],
+    [12, 664, 2754, 616, 616],
+    [13, 1328, 2754, 616, 616]
   ]
 };
 
@@ -203,65 +193,115 @@ const PLSHOPET_BOARD = {
   ]
 };
 
-// Parro.mood19: its own bento (ver01, image/brand/Parro.mood19/brand-guide/bento/).
+// Parro.mood19: its own bento (v2, image/brand/Parro.mood19/bento-v2/).
 const PARRO_BOARD = {
-  w: 1944, h: 7310,
+  w: 1944, h: 5566, bg: '#FFFFFF', radius: 0,
   tiles: [
-    [1, 0, 0, 1228.81, 691.19],
-    [2, 1252.81, 0, 691.19, 691.19],
-    [3, 0, 715.19, 468, 585],
-    [4, 492, 715.19, 468, 585],
-    [5, 984, 715.19, 468, 585],
-    [6, 1476, 715.19, 468, 585],
-    [7, 0, 1324.19, 960, 539.99],
-    [8, 984, 1324.19, 960, 539.99],
-    [9, 0, 1888.19, 1944, 809.9],
-    [10, 0, 2722.09, 625.78, 352],
-    [11, 649.78, 2722.09, 1294.22, 727.99],
-    [12, 0, 3098.08, 625.78, 352],
-    [13, 0, 3474.08, 449.05, 561.31],
-    [14, 473.05, 3474.08, 997.9, 561.31],
-    [15, 1494.95, 3474.08, 449.05, 561.31],
-    [16, 0, 4059.39, 1000.43, 562.73],
-    [17, 1024.43, 4059.39, 919.57, 1149.47],
-    [18, 0, 4646.12, 1000.43, 562.73],
-    [19, 0, 5232.86, 960, 539.99],
-    [20, 984, 5232.86, 960, 539.99],
-    [21, 0, 5796.85, 1324.14, 744.82],
-    [22, 1348.14, 5796.85, 595.86, 744.82],
-    [23, 0, 6565.67, 595.86, 744.82],
-    [24, 619.86, 6565.67, 1324.14, 744.82]
+    [1, 0, 0, 1944, 700],
+    [2, 0, 706, 644, 805],
+    [3, 650, 706, 644, 805],
+    [4, 1300, 706, 644, 805],
+    [5, 0, 1517, 644, 805],
+    [6, 650, 1517, 644, 805],
+    [7, 1300, 1517, 644, 805],
+    [8, 0, 2328, 644, 805],
+    [9, 650, 2328, 644, 805],
+    [10, 1300, 2328, 644, 805],
+    [11, 0, 3139, 644, 805],
+    [12, 650, 3139, 644, 805],
+    [13, 1300, 3139, 644, 805],
+    [14, 0, 3950, 644, 805],
+    [15, 650, 3950, 644, 805],
+    [16, 1300, 3950, 644, 805],
+    [17, 0, 4761, 644, 805],
+    [18, 650, 4761, 644, 805],
+    [19, 1300, 4761, 644, 805]
   ]
 };
 
-// Gốm và mình: its own bento (ver01, image/brand/Gốm và mình/brand-guide/bento/).
+// Gốm và mình: its own bento (v2, image/brand/Gốm và mình/bento-v2/).
 const GOM_BOARD = {
-  w: 1944, h: 7440,
+  w: 1944, h: 2594, bg: '#E8DCC9', radius: 0,
   tiles: [
-    [1, 0, 0, 1324.14, 744.82],
-    [2, 1348.14, 0, 595.86, 744.82],
-    [3, 0, 768.82, 960, 539.99],
-    [4, 984, 768.82, 960, 539.99],
-    [5, 0, 1332.81, 1944, 739.98],
-    [6, 0, 2096.79, 892.24, 501.88],
-    [7, 0, 2622.67, 892.24, 501.88],
-    [8, 916.24, 2096.79, 1027.76, 1027.76],
-    [9, 0, 3148.55, 370.71, 557.96],
-    [10, 394.71, 3148.55, 991.94, 557.96],
-    [11, 1410.65, 3148.55, 533.35, 557.96],
-    [12, 0, 3730.51, 1031.6, 580.27],
-    [13, 0, 4334.78, 1031.6, 580.27],
-    [14, 1055.6, 3730.51, 888.4, 1184.53],
-    [15, 0, 4939.05, 632, 632],
-    [16, 656, 4939.05, 632, 632],
-    [17, 1312, 4939.05, 632, 632],
-    [18, 0, 5595.05, 960, 539.99],
-    [19, 984, 5595.05, 960, 539.99],
-    [20, 0, 6159.04, 1390.65, 529.35],
-    [21, 1414.65, 6159.04, 529.35, 529.35],
-    [22, 0, 6712.39, 625.78, 352],
-    [23, 0, 7088.38, 625.78, 352],
-    [24, 649.78, 6712.39, 1294.22, 727.99]
+    [1, 0, 0, 1944, 319],
+    [2, 0, 325, 969, 644],
+    [3, 975, 325, 319, 319],
+    [4, 1300, 325, 319, 319],
+    [5, 1625, 325, 319, 319],
+    [6, 975, 650, 319, 319],
+    [7, 1300, 650, 644, 644],
+    [8, 0, 975, 319, 319],
+    [9, 325, 975, 319, 319],
+    [10, 650, 975, 644, 644],
+    [11, 0, 1300, 644, 644],
+    [12, 1300, 1300, 644, 969],
+    [13, 650, 1625, 644, 319],
+    [14, 0, 1950, 319, 319],
+    [15, 325, 1950, 969, 644],
+    [16, 0, 2275, 319, 319],
+    [17, 1300, 2275, 644, 319]
+  ]
+};
+
+// FSEL: its own bento (v2, image/brand/FSEL/bento-v2/).
+const FSEL_BOARD = {
+  w: 1944, h: 3395, bg: '#1E273E', radius: 0,
+  tiles: [
+    [1, 0, 0, 168, 3395],
+    [2, 192, 0, 1752, 620],
+    [3, 192, 644, 420, 500],
+    [4, 636, 644, 420, 500],
+    [5, 1080, 644, 420, 500],
+    [6, 1524, 644, 420, 500],
+    [7, 192, 1168, 760, 560],
+    [8, 976, 1168, 968, 560],
+    [9, 192, 1752, 420, 747],
+    [10, 636, 1752, 420, 747],
+    [11, 1080, 1752, 420, 747],
+    [12, 1524, 1752, 420, 747],
+    [13, 192, 2523, 413, 516],
+    [14, 629, 2523, 775, 516],
+    [15, 1428, 2523, 516, 516],
+    [16, 192, 3063, 1752, 332]
+  ]
+};
+
+// Broker by Trade (BBT): its own bento (v2, image/brand/Broker by Trade (BBT)/bento-v2/).
+const BBT_BOARD = {
+  w: 1944, h: 2424, bg: '#0B1223', radius: 0,
+  tiles: [
+    [1, 0, 1560, 376, 240],
+    [2, 0, 1816, 376, 240],
+    [3, 0, 2072, 376, 328],
+    [4, 392, 1170, 376, 520],
+    [5, 392, 1706, 376, 400],
+    [6, 392, 2122, 376, 278],
+    [7, 784, 780, 376, 420],
+    [8, 784, 1216, 376, 640],
+    [9, 784, 1872, 376, 528],
+    [10, 1176, 390, 376, 700],
+    [11, 1176, 1106, 376, 560],
+    [12, 1176, 1682, 376, 718],
+    [13, 1568, 0, 376, 700],
+    [14, 1568, 716, 376, 860],
+    [15, 1568, 1592, 376, 808],
+    [16, 0, 2416, 1944, 8]
+  ]
+};
+
+// Alpha Media: its own bento (v2, image/brand/Alpha Media/bento-v2/).
+const ALPHA_BOARD = {
+  w: 1944, h: 2541, bg: '#141414', radius: 0,
+  tiles: [
+    [1, 0, 0, 1944, 560],
+    [2, 0, 584, 1944, 389],
+    [3, 0, 997, 560, 800],
+    [4, 584, 997, 420, 800],
+    [5, 1028, 997, 446, 384],
+    [6, 1498, 997, 446, 384],
+    [7, 1028, 1405, 916, 392],
+    [8, 0, 1821, 1080, 720],
+    [9, 1104, 1821, 840, 720]
   ]
 };
 
@@ -282,7 +322,7 @@ const WORK = [
       { name: 'Percept', slug: 'percept', shots: 20, ext: 'jpg', frame: 'bento', desc: '',
         board: PERCEPT_BOARD },
 
-      { name: 'FSEL', slug: 'fsel', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,
+      { name: 'FSEL', slug: 'fsel', shots: 16, ext: 'jpg', frame: 'bento', board: FSEL_BOARD,
         meta: [
           { label: 'Year',     value: '2022 – 2024' },
           { label: 'Industry', value: 'Education' },
@@ -309,7 +349,7 @@ const WORK = [
         tools: ['figma', 'illustrator'],
         desc: 'The same school, aimed at Japan. Most of the system carried over intact; what changed was density — Japanese layouts hold more per centimetre before they read as crowded, so the grid tightened and the mark got more air.' },
 
-      { name: 'Gốm và mình', slug: 'gom-va-minh', shots: 24, ext: 'jpg', frame: 'bento', board: GOM_BOARD,
+      { name: 'Gốm và mình', slug: 'gom-va-minh', shots: 17, ext: 'jpg', frame: 'bento', board: GOM_BOARD,
         meta: [
           { label: 'Year',     value: '2022' },
           { label: 'Industry', value: 'Ceramics / craft' },
@@ -319,12 +359,12 @@ const WORK = [
         desc: 'A ceramics studio where nothing leaves the kiln twice the same. The system leaves room for that: type stays fixed, everything around it stays loose, so an uneven rim reads as the point and not as a defect.' },
 
       { name: 'Dingli',        slug: 'dingli',         shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD,    desc: '' },
-      { name: 'Material Band', slug: 'matterial-band', shots: 23, ext: 'jpg', frame: 'bento', board: MATERIAL_BOARD, desc: '' },
+      { name: 'Material Band', slug: 'matterial-band', shots: 13, ext: 'jpg', frame: 'bento', board: MATERIAL_BOARD, desc: '' },
       { name: 'Asterox',       slug: 'asterox',        shots: 20, ext: 'jpg', frame: 'bento', board: ASTEROX_BOARD,  desc: '' },
       { name: 'PL shopet',     slug: 'pl-shopet',      shots: 20, ext: 'jpg', frame: 'bento', board: PLSHOPET_BOARD,    desc: '' },
-      { name: 'Broker by Trade (BBT)', slug: 'broker-by-trade', shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' },
-      { name: 'Alpha Media',   slug: 'alpha-media',    shots: 19, ext: 'jpg', frame: 'bento', board: BRAND_BOARD, desc: '' },
-      { name: 'Parro.mood19',  slug: 'parro-mood19',   shots: 24, ext: 'jpg', frame: 'bento', board: PARRO_BOARD, desc: '' }
+      { name: 'Broker by Trade (BBT)', slug: 'broker-by-trade', shots: 16, ext: 'jpg', frame: 'bento', board: BBT_BOARD, desc: '' },
+      { name: 'Alpha Media',   slug: 'alpha-media',    shots: 9, ext: 'jpg', frame: 'bento', board: ALPHA_BOARD, desc: '' },
+      { name: 'Parro.mood19',  slug: 'parro-mood19',   shots: 19, ext: 'jpg', frame: 'bento', board: PARRO_BOARD, desc: '' }
     ]
   },
   {
@@ -920,6 +960,8 @@ const TOOL_ICONS = {
     // squeeze into a tall narrow box after Branding was opened.
     gridEl.classList.remove('work__grid--board');
     gridEl.style.aspectRatio = '';
+    gridEl.style.removeProperty('background');
+    gridEl.style.removeProperty('--tile-r');
 
     // AI flow builds its showcase live instead of laying out tiles — see
     // js/swarm.js. The screenshot (if any) lands at the end of the build.
@@ -950,6 +992,10 @@ const TOOL_ICONS = {
     const board = !isFlat(current) && current.projects[project].board;
     gridEl.classList.toggle('work__grid--board', !!board);
     gridEl.style.aspectRatio = board ? `${board.w} / ${board.h}` : '';
+    // A board may carry its own ground (the colour its gutters show, e.g. Gốm's
+    // grout or Alpha's black wall) and its own tile corner radius in px.
+    if (board && board.bg) gridEl.style.background = board.bg;
+    if (board && board.radius != null) gridEl.style.setProperty('--tile-r', board.radius + 'px');
     if (board){
       board.tiles.forEach(([n, x, y, w, h]) => {
         const t = tile(label, n);

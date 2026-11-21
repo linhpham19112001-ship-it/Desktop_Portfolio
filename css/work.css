@@ -539,6 +539,7 @@
 .work[data-cat="branding"][data-frame="bento"] .work__grid--board .work__tile{
   position: absolute;
   min-height: 0;
+  border-radius: var(--tile-r, .7rem);
 }
 
 /* ---- frame: spotlight --------------------------------------------
