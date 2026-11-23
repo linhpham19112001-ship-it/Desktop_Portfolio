@@ -741,9 +741,10 @@
   background: rgba(255,233,176,.04);
   overflow: hidden;
   cursor: pointer;
-  transition: transform .22s var(--ease), border-color .22s;
+  transition: border-color .22s;
 }
-.work__tile:hover{ transform: translateY(-3px); border-color: rgba(255,233,176,.4); }
+/* No movement on hover (tiles stay put); only the hairline brightens. */
+.work__tile:hover{ border-color: rgba(255,233,176,.4); }
 
 .work__tile img{
   width: 100%;
