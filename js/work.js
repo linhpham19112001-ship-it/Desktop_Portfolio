@@ -541,6 +541,10 @@ const WORK = [
       { name: 'Percept', slug: 'percept', shots: 20, ext: 'jpg', frame: 'bento', desc: '',
         board: PERCEPT_BOARD },
 
+      { name: 'Asterox',       slug: 'asterox',        shots: 22, ext: 'jpg', frame: 'bento', board: ASTEROX_BOARD,  desc: '' },
+
+      { name: 'Material Band', slug: 'matterial-band', shots: 32, ext: 'jpg', frame: 'bento', board: MATERIAL_BOARD, desc: '' },
+
       { name: 'FSEL', slug: 'fsel', shots: 46, ext: 'jpg', frame: 'bento', board: FSEL_BOARD,
         meta: [
           { label: 'Year',     value: '2022 – 2024' },
@@ -549,15 +553,6 @@ const WORK = [
         ],
         tools: ['figma', 'illustrator'],
         desc: 'An English centre that fits in a pocket — course, tutor and mock test, all inside the app. The mark had to hold at icon size first and stretch to a launch backdrop second, which is the opposite of the order these usually get drawn in.' },
-
-      { name: 'Khoi', slug: 'khoi', shots: 27, ext: 'jpg', frame: 'bento', board: KHOI_BOARD,
-        meta: [
-          { label: 'Year',     value: '2023' },
-          { label: 'Industry', value: 'Personal brand' },
-          { label: 'Type',     value: 'Wordmark' }
-        ],
-        tools: ['illustrator'],
-        desc: 'A personal mark for a founder who did not want to look like a company. One glyph, drawn once, used at three sizes and never redrawn — the restraint is the identity.' },
 
       { name: 'FSEL Japan', slug: 'fsel-japan', shots: 42, ext: 'jpg', frame: 'bento', board: FSELJP_BOARD,
         meta: [
@@ -578,12 +573,23 @@ const WORK = [
         desc: 'A ceramics studio where nothing leaves the kiln twice the same. The system leaves room for that: type stays fixed, everything around it stays loose, so an uneven rim reads as the point and not as a defect.' },
 
       { name: 'Dingli',        slug: 'dingli',         shots: 18, ext: 'jpg', frame: 'bento', board: DINGLI_BOARD,    desc: '' },
-      { name: 'Material Band', slug: 'matterial-band', shots: 32, ext: 'jpg', frame: 'bento', board: MATERIAL_BOARD, desc: '' },
-      { name: 'Asterox',       slug: 'asterox',        shots: 22, ext: 'jpg', frame: 'bento', board: ASTEROX_BOARD,  desc: '' },
-      { name: 'PL shopet',     slug: 'pl-shopet',      shots: 25, ext: 'jpg', frame: 'bento', board: PLSHOPET_BOARD,    desc: '' },
+
       { name: 'Broker by Trade (BBT)', slug: 'broker-by-trade', shots: 27, ext: 'jpg', frame: 'bento', board: BBT_BOARD, desc: '' },
+
       { name: 'Alpha Media',   slug: 'alpha-media',    shots: 34, ext: 'jpg', frame: 'bento', board: ALPHA_BOARD, desc: '' },
-      { name: 'Parro.mood19',  slug: 'parro-mood19',   shots: 31, ext: 'jpg', frame: 'bento', board: PARRO_BOARD, desc: '' }
+
+      { name: 'Parro.mood19',  slug: 'parro-mood19',   shots: 31, ext: 'jpg', frame: 'bento', board: PARRO_BOARD, desc: '' },
+
+      { name: 'PL shopet',     slug: 'pl-shopet',      shots: 25, ext: 'jpg', frame: 'bento', board: PLSHOPET_BOARD,    desc: '' },
+
+      { name: 'Khoi', slug: 'khoi', shots: 27, ext: 'jpg', frame: 'bento', board: KHOI_BOARD,
+        meta: [
+          { label: 'Year',     value: '2023' },
+          { label: 'Industry', value: 'Personal brand' },
+          { label: 'Type',     value: 'Wordmark' }
+        ],
+        tools: ['illustrator'],
+        desc: 'A personal mark for a founder who did not want to look like a company. One glyph, drawn once, used at three sizes and never redrawn — the restraint is the identity.' }
     ]
   },
   {
